@@ -35,7 +35,9 @@ def load_assets():
             assets[character] = pygame.transform.scale(assets[character], (CARD_SIZE, CARD_SIZE))
     
     # Load the icon of the window
-    assets['icon'] = pygame.image.load(join(assets_path, 'icons', 'icon.png'))
+    assets['icon'] = pygame.image.load(join(assets_path, 'icons', 'icon.jpg'))
+
+    # Resize the icon of the window
     assets['icon'] = pygame.transform.scale(assets['icon'], (256, 256))
 
     # Set the font of the text (Arial, 20pt)
@@ -45,6 +47,18 @@ def load_assets():
     assets['0'] = font.render('A Game of Thrones: Hand of the King', True, [0, 0, 0])
     assets['1'] = font.render('Player 1\'s turn', True, [0, 0, 0])
     assets['2'] = font.render('Player 2\'s turn', True, [0, 0, 0])
+
+    # Set the font of the text (Arial, 25pt)
+    font = pygame.font.SysFont('Arial', 25)
+
+    assets['1_wins'] = font.render('Player 1 wins!', True, [255, 255, 255])
+    assets['2_wins'] = font.render('Player 2 wins!', True, [255, 255, 255])
+
+    # Load the background of win screen
+    assets['win_screen'] = pygame.image.load(join(assets_path, 'backgrounds', 'win_screen.jpg'))
+
+    # Resize the background of win screen to the size of the board
+    assets['win_screen'] = pygame.transform.scale(assets['win_screen'], (BOARD_WIDTH, BOARD_HEIGHT))
 
 def init_board():
     '''
@@ -141,34 +155,32 @@ def draw_board(board, cards, banner_footer):
     # Update the display
     update()
 
-def display_winner(board, player1, player2, winner):
+def display_winner(board, winner):
     '''
     This function displays the winner of the game.
 
     Parameters:
         board (pygame.Surface): the screen for the game
-        player1 (Player): player 1
-        player2 (Player): player 2
-        winner (str): winner of the game
+        winner (int): the winner of the game
     '''
 
     # Clear the board
     board.fill([255, 255, 255])
 
-    # Set the font of the text (Arial, 20pt)
-    font = pygame.font.SysFont('Arial', 20)
+    # Load the background of the win screen
+    win_screen = assets['win_screen']
 
-    # Set the text to display
-    text = f"Player {winner} wins!\n Player 1 Banners: {sum(player1.get_banners().values())}\n Player 2 Banners: {sum(player2.get_banners().values())}"
+    # Draw the background of the win screen
+    board.blit(win_screen, (0, 0))
 
-    # Render the text
-    text = font.render(text, True, [0, 0, 0])
+    # Get the text to display
+    text = assets[str(winner) + '_wins']
 
     # Get the size of the text
     text_rect = text.get_rect()
 
     # Set the position of the text in the center of the board
-    text_rect.center = (BOARD_WIDTH // 2, BOARD_HEIGHT // 2)
+    text_rect.center = (BOARD_WIDTH // 2 - 12, BOARD_HEIGHT // 2 + 38)
 
     # Draw the text on the board
     board.blit(text, text_rect)

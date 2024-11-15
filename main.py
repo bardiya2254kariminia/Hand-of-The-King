@@ -17,8 +17,8 @@ from classes import Card, Player
 path = dirname(abspath(__file__))
 
 parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
-parser.add_argument('--player1', metavar='p1', type=str, help="either human or the name of an AI file", default='human')
-parser.add_argument('--player2', metavar='p2', type=str, help="either human or the name of an AI file", default='human')
+parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
+parser.add_argument('--player2', metavar='p2', type=str, help="either human or an AI file", default='human')
 parser.add_argument('-l', '--load', type=str, help="file containing starting board setup (for repeatability)", default=None)
 parser.add_argument('-s', '--save', type=str, help="file to save board setup to", default=None)
 
@@ -205,6 +205,22 @@ def calculate_winner(player1, player2):
         elif player2_banners['Tully'] > player1_banners['Tully']:
             return 2
 
+def find_card(cards, location):
+    '''
+    This function finds the card at the location.
+
+    Parameters:
+        cards (list): list of Card objects
+        location (int): location of the card
+
+    Returns:
+        card (Card): card at the location
+    '''
+
+    for card in cards:
+        if card.get_location() == location:
+            return card
+
 def make_move(cards, move, player):
     '''
     This function makes a move for the player.
@@ -225,10 +241,7 @@ def make_move(cards, move, player):
     move_row, move_col = move // 6, move % 6
 
     # Find the selected card
-    for card in cards:
-        if card.get_location() == move:
-            selected_card = card
-            break
+    selected_card = find_card(cards, move)
     
     removing_cards = []
 
@@ -280,13 +293,18 @@ def make_move(cards, move, player):
     # Remove the selected card
     cards.remove(selected_card)
 
-def set_banners(player1, player2):
+    # Return the selected card's house
+    return selected_card.get_house()
+
+def set_banners(player1, player2, last_house, last_turn):
     '''
     This function sets the banners for the players.
 
     Parameters:
         player1 (Player): player 1
         player2 (Player): player 2
+        last_house (str): house of the last chosen card
+        last_turn (int): last turn of the player
     '''
 
     # Get the cards of the players
@@ -302,6 +320,16 @@ def set_banners(player1, player2):
         elif len(player2_cards[house]) > len(player1_cards[house]):
             player2.get_house_banner(house)
             player1.remove_house_banner(house)
+        
+        # If the number of cards is the same, the player who chose the last card of that house gets the banner
+        elif last_house == house:
+            if last_turn == 1:
+                player1.get_house_banner(house)
+                player2.remove_house_banner(house)
+            
+            else:
+                player2.get_house_banner(house)
+                player1.remove_house_banner(house)
             
 def main(args):
     '''
@@ -395,7 +423,7 @@ def main(args):
             winner = calculate_winner(player1, player2)
             
             # Display the winner
-            pygraphics.display_winner(board, player1, player2, winner)
+            pygraphics.display_winner(board, winner)
 
             # Show the board for 5 seconds
             pygraphics.show_board(5)
@@ -420,10 +448,10 @@ def main(args):
         # Check if the move is valid
         if move in moves:
             # Make the move
-            make_move(cards, move, player1 if turn == 1 else player2)
+            selected_house = make_move(cards, move, player1 if turn == 1 else player2)
 
             # Set the banners for the players
-            set_banners(player1, player2)
+            set_banners(player1, player2, selected_house, turn)
 
             # Change the turn
             turn = 2 if turn == 1 else 1
