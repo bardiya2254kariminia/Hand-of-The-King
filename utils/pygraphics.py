@@ -68,9 +68,6 @@ def init_board():
         screen (pygame.Surface): the screen for the game
     '''
 
-    # Put the board in the center of the screen
-    environ['SDL_VIDEO_CENTERED'] = '0'
-
     # Initialize Pygame
     pygame.init()
 
@@ -82,11 +79,18 @@ def init_board():
     if BOARD_WIDTH > monitor_info.current_w or BOARD_HEIGHT > monitor_info.current_h:
         # Change the size of the cards
         global CARD_SIZE
-        CARD_SIZE = 95
+        CARD_SIZE = 90
 
         # Change the size of the board to fit the monitor
         BOARD_HEIGHT = ROWS * CARD_SIZE + (ROWS - 1) * MARGIN + FOOTER_SIZE
         BOARD_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN
+
+        # Put the board in the top center of the screen
+        environ['SDL_VIDEO_WINDOW_POS'] = '%d, 0' % ((monitor_info.current_w - BOARD_WIDTH) // 2)
+    
+    else:
+        # Put the board in the center of the screen
+        environ['SDL_VIDEO_CENTERED'] = '1'
 
     # Load the assets of the game
     load_assets()
@@ -168,6 +172,8 @@ def draw_board(board, cards, banner_footer):
 
     # Update the display
     update()
+
+    pygame.image.save(board, assets_path + "/board.png")
 
 def display_winner(board, winner):
     '''
