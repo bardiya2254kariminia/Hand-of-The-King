@@ -86,7 +86,8 @@ def init_board():
         BOARD_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN
 
         # Put the board in the top center of the screen
-        environ['SDL_VIDEO_WINDOW_POS'] = '%d, 0' % ((monitor_info.current_w - BOARD_WIDTH) // 2)
+        environ.pop('SDL_VIDEO_CENTERED', None) # Remove the previous setting
+        environ['SDL_VIDEO_WINDOW_POS'] = '%d, 30' % ((monitor_info.current_w - BOARD_WIDTH) // 2)
     
     else:
         # Put the board in the center of the screen
@@ -172,8 +173,6 @@ def draw_board(board, cards, banner_footer):
 
     # Update the display
     update()
-
-    pygame.image.save(board, assets_path + "/board.png")
 
 def display_winner(board, winner):
     '''
