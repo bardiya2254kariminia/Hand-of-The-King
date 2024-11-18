@@ -74,6 +74,20 @@ def init_board():
     # Initialize Pygame
     pygame.init()
 
+    # Get the size of the monitor
+    monitor_info = pygame.display.Info()
+
+    # Check if the board fits the monitor
+    global BOARD_HEIGHT, BOARD_WIDTH
+    if BOARD_WIDTH > monitor_info.current_w or BOARD_HEIGHT > monitor_info.current_h:
+        # Change the size of the cards
+        global CARD_SIZE
+        CARD_SIZE = 95
+
+        # Change the size of the board to fit the monitor
+        BOARD_HEIGHT = ROWS * CARD_SIZE + (ROWS - 1) * MARGIN + FOOTER_SIZE
+        BOARD_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN
+
     # Load the assets of the game
     load_assets()
 
@@ -228,5 +242,13 @@ def get_player_move():
                 # Check if the location is valid
                 if location < ROWS * COLS:
                     move_made = True
+            
+            # Check if the event is the close button
+            elif event.type == pygame.QUIT:
+                # Close the window
+                pygame.quit()
+
+                # Exit the program
+                exit()
 
     return location
