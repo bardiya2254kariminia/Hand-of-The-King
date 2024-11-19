@@ -1,5 +1,6 @@
 import argparse
 import importlib
+import concurrent.futures
 import random
 from os.path import abspath, join, dirname
 import sys
@@ -15,6 +16,8 @@ from classes import Card, Player
 
 # Set the path of the file
 path = dirname(abspath(__file__))
+
+TIMEOUT = 1  # Time limit for the AI agent
 
 parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
 parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
@@ -330,6 +333,32 @@ def set_banners(player1, player2, last_house, last_turn):
             else:
                 player2.get_house_banner(house)
                 player1.remove_house_banner(house)
+
+def try_get_move(agent, cards, player1, player2):
+    '''
+    This function tries to get the move from the AI agent.
+
+    Parameters:
+        agent (module): AI agent
+        cards (list): list of Card objects
+        player1 (Player): player 1
+        player2 (Player): player 2
+
+    Returns:
+        move (int): location of the card
+    '''
+    
+    # Try to get the move from the AI agent in TIMEOUT seconds
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(agent.get_move, copy.deepcopy(cards), copy.deepcopy(player1), copy.deepcopy(player2))
+
+        try:
+            move = future.result(timeout=TIMEOUT)
+        
+        except concurrent.futures.TimeoutError:
+            move = None
+    
+    return move
             
 def main(args):
     '''
@@ -403,8 +432,8 @@ def main(args):
             return
     
     # Set up the players
-    player1 = Player(player1_agent)
-    player2 = Player(player2_agent)
+    player1 = Player(args.player1)
+    player2 = Player(args.player2)
 
     # Set up the turn
     turn = 1 # 1: player 1's turn, 2: player 2's turn
@@ -432,18 +461,32 @@ def main(args):
 
         # Get the player's move
         if turn == 1:
+            # Check if the player is human or AI
             if player1_agent is None:
+                # Wait for the player to make a move with the mouse
                 move = pygraphics.get_player_move()
             
             else:
-                move = player1.get_move(copy.deepcopy(cards))
+                # Get the move from the AI agent
+                move = try_get_move(player1_agent, cards, player1, player2)
+
+                # If the move is None, change the turn
+                if move is None:
+                    turn = 2
         
         else:
+            # Check if the player is human or AI
             if player2_agent is None:
+                # Wait for the player to make a move with the mouse
                 move = pygraphics.get_player_move()
             
             else:
-                move = player2.get_move(copy.deepcopy(cards))
+                # Get the move from the AI agent
+                move = try_get_move(player2_agent, cards, player2, player1)
+
+                # If the move is None, change the turn
+                if move is None:
+                    turn = 1
         
         # Check if the move is valid
         if move in moves:
@@ -462,9 +505,6 @@ def main(args):
             
             else:
                 pygraphics.draw_board(board, cards, '2')
-            
-            # Show the board for 2 seconds
-            pygraphics.show_board(2)
 
 if __name__ == "__main__":
     main(parser.parse_args())
