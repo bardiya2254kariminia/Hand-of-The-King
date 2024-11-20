@@ -1,5 +1,6 @@
 import pygame
 import json
+import time
 from os import pardir, environ
 from os.path import abspath, join, dirname
 
@@ -13,6 +14,7 @@ MARGIN = 15  # Space in between cards
 FOOTER_SIZE = 30  # Size of the footer
 BOARD_HEIGHT = ROWS * CARD_SIZE + (ROWS - 1) * MARGIN + FOOTER_SIZE  # Height of the board
 BOARD_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN  # Width of the board
+WINNER_HEIGHT_OFFSET = 36  # Height offset of the winner text
 assets = {} # Dictionary to store every asset
 
 def load_assets():
@@ -48,12 +50,6 @@ def load_assets():
     assets['1'] = font.render('Player 1\'s turn', True, [0, 0, 0])
     assets['2'] = font.render('Player 2\'s turn', True, [0, 0, 0])
 
-    # Set the font of the text (Arial, 25pt)
-    font = pygame.font.SysFont('Arial', 25)
-
-    assets['1_wins'] = font.render('Player 1 wins!', True, [255, 255, 255])
-    assets['2_wins'] = font.render('Player 2 wins!', True, [255, 255, 255])
-
     # Load the background of win screen
     assets['win_screen'] = pygame.image.load(join(assets_path, 'backgrounds', 'win_screen.jpg'))
 
@@ -84,6 +80,10 @@ def init_board():
         # Change the size of the board to fit the monitor
         BOARD_HEIGHT = ROWS * CARD_SIZE + (ROWS - 1) * MARGIN + FOOTER_SIZE
         BOARD_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN
+
+        # Change the winner height offset
+        global WINNER_HEIGHT_OFFSET
+        WINNER_HEIGHT_OFFSET = 31
 
         # Put the board in the top center of the screen
         environ.pop('SDL_VIDEO_CENTERED', None) # Remove the previous setting
@@ -174,13 +174,14 @@ def draw_board(board, cards, banner_footer):
     # Update the display
     update()
 
-def display_winner(board, winner):
+def display_winner(board, winner, winner_agent):
     '''
     This function displays the winner of the game.
 
     Parameters:
         board (pygame.Surface): the screen for the game
-        winner (int): the winner of the game
+        winner (int): the number of the winner
+        winner_agent (str): the agent of the winner
     '''
 
     # Clear the board
@@ -192,14 +193,24 @@ def display_winner(board, winner):
     # Draw the background of the win screen
     board.blit(win_screen, (0, 0))
 
+    # Set the font of the text (Arial, 25pt)
+    font = pygame.font.SysFont('Arial', 25)
+
     # Get the text to display
-    text = assets[str(winner) + '_wins']
+    if winner_agent == 'human':
+        text = 'Player ' + str(winner)
+    
+    else:
+        text = winner_agent[max(0, winner_agent.find('/'), winner_agent.find('\\')):]
+
+    # Render the text
+    text = font.render(text + ' wins!', True, [255, 255, 255])
 
     # Get the size of the text
     text_rect = text.get_rect()
 
     # Set the position of the text in the center of the board
-    text_rect.center = (BOARD_WIDTH // 2 - 12, BOARD_HEIGHT // 2 + 38)
+    text_rect.center = (BOARD_WIDTH // 2 - 12, BOARD_HEIGHT // 2 + WINNER_HEIGHT_OFFSET)
 
     # Draw the text on the board
     board.blit(text, text_rect)
@@ -215,8 +226,19 @@ def show_board(seconds):
         seconds (int): number of seconds to show the board
     '''
 
-    # Wait for a certain amount of time
-    pygame.time.wait(seconds * 1000)
+    # Get the initial time
+    initial_time = time.time()
+
+    # Show the board for the given amount of time
+    while time.time() - initial_time < seconds:
+        for event in pygame.event.get():
+            # Check if the event is the close button
+            if event.type == pygame.QUIT:
+                # Close the window
+                pygame.quit()
+
+                # Exit the program
+                exit()
 
 def get_player_move():
     '''

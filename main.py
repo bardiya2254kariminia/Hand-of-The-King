@@ -2,6 +2,8 @@ import argparse
 import importlib
 import concurrent.futures
 import random
+from os import name as os_name
+from os import system as os_system
 from os.path import abspath, join, dirname
 import sys
 import json
@@ -108,7 +110,7 @@ def find_varys(cards):
 
     return varys_location
 
-def get_moves(cards):
+def get_possible_moves(cards):
     '''
     This function gets the possible moves for the player.
 
@@ -334,6 +336,25 @@ def set_banners(player1, player2, last_house, last_turn):
                 player2.get_house_banner(house)
                 player1.remove_house_banner(house)
 
+def print_banners(player1, player2):
+    '''
+    This function prints the banners of the players.
+
+    Parameters:
+        player1 (Player): player 1
+        player2 (Player): player 2
+    '''
+
+    # Clear the screen
+    if os_name == 'nt':
+        os_system('cls')
+    
+    else:
+        os_system('clear')
+
+    print("Player 1's banners:", player1.get_banners())
+    print("Player 2's banners:", player2.get_banners())
+
 def try_get_move(agent, cards, player1, player2):
     '''
     This function tries to get the move from the AI agent.
@@ -442,17 +463,20 @@ def main(args):
     pygraphics.draw_board(board, cards, '1')
 
     while True:
-        # Check the moves for the player
-        moves = get_moves(cards)
+        # Check the possible moves for the player
+        moves = get_possible_moves(cards)
 
         # Check if the game is over
         if len(moves) == 0:
             
             # Get the winner of the game
             winner = calculate_winner(player1, player2)
+
+            # Print each player's banners
+            print_banners(player1, player2)
             
             # Display the winner
-            pygraphics.display_winner(board, winner)
+            pygraphics.display_winner(board, winner, player1.get_agent() if winner == 1 else player2.get_agent())
 
             # Show the board for 5 seconds
             pygraphics.show_board(5)
@@ -496,6 +520,9 @@ def main(args):
             # Set the banners for the players
             set_banners(player1, player2, selected_house, turn)
 
+            # Print each player's banners
+            print_banners(player1, player2)
+
             # Change the turn
             turn = 2 if turn == 1 else 1
 
@@ -505,6 +532,9 @@ def main(args):
             
             else:
                 pygraphics.draw_board(board, cards, '2')
+            
+            # Show the board for 0.5 seconds
+            pygraphics.show_board(0.5)
 
 if __name__ == "__main__":
     main(parser.parse_args())

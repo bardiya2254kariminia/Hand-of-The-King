@@ -77,7 +77,7 @@ class Player:
         This function initializes the player.
 
         Parameters:
-            agent (int): the agent of the player
+            agent (str): the agent of the player
         '''
 
         self.agent = agent
@@ -89,7 +89,7 @@ class Player:
         This function returns the agent of the player.
 
         Returns:
-            agent (int): the agent of the player
+            agent (str): the agent of the player
         '''
 
         return self.agent
