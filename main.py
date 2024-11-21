@@ -407,6 +407,7 @@ def print_cards_status(player1_status, player2_status):
         except:
             print(f"{house}: {status[0]}", end=' ')
     
+    # Print a new line
     print()
 
     print("Player 2 cards status:", end=' ')
@@ -423,6 +424,9 @@ def print_cards_status(player1_status, player2_status):
         
         except:
             print(f"{house}: {status[0]}", end=' ')
+    
+    # Print a new line
+    print()
 
 def try_get_move(agent, cards, player1, player2):
     '''
