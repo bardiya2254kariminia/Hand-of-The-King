@@ -354,7 +354,12 @@ def set_banners(player1, player2, last_house, last_turn):
             player2.remove_house_banner(house)
 
             # Set the status of the cards
-            player1_status[house] = len(player1_cards[house]), 'Green'
+            if len(player1_cards[house]) != 0:
+                player1_status[house] = len(player1_cards[house]), 'Green'
+            
+            else:
+                player1_status[house] = len(player1_cards[house]), 'White'
+            
             player2_status[house] = len(player2_cards[house]), 'White'
         
         else:
@@ -363,8 +368,13 @@ def set_banners(player1, player2, last_house, last_turn):
             player1.remove_house_banner(house)
 
             # Set the status of the cards
+            if len(player2_cards[house]) != 0:
+                player2_status[house] = len(player2_cards[house]), 'Green'
+            
+            else:
+                player2_status[house] = len(player2_cards[house]), 'White'
+            
             player1_status[house] = len(player1_cards[house]), 'White'
-            player2_status[house] = len(player2_cards[house]), 'Green'
     
     return player1_status, player2_status
 
