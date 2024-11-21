@@ -19,7 +19,7 @@ from classes import Card, Player
 # Set the path of the file
 path = dirname(abspath(__file__))
 
-TIMEOUT = 1  # Time limit for the AI agent
+TIMEOUT = 10  # Time limit for the AI agent
 
 parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
 parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
@@ -310,50 +310,119 @@ def set_banners(player1, player2, last_house, last_turn):
         player2 (Player): player 2
         last_house (str): house of the last chosen card
         last_turn (int): last turn of the player
+    
+    Returns:
+        player1_status (dict): status of the cards for player 1
+        player2_status (dict): status of the cards for player 2
     '''
 
     # Get the cards of the players
     player1_cards = player1.get_cards()
     player2_cards = player2.get_cards()
 
+    # Initialize the status of the cards
+    player1_status = {}
+    player2_status = {}
+
     for house in player1_cards.keys():
+        # Flag to keep track of the selected player
+        selected_player = None
+
         # The player with the more cards of a house gets the banner
         if len(player1_cards[house]) > len(player2_cards[house]):
-            player1.get_house_banner(house)
-            player2.remove_house_banner(house)
+            # Give the banner to player 1
+            selected_player = 1
         
         elif len(player2_cards[house]) > len(player1_cards[house]):
-            player2.get_house_banner(house)
-            player1.remove_house_banner(house)
+            # Give the banner to player 2
+            selected_player = 2
         
         # If the number of cards is the same, the player who chose the last card of that house gets the banner
         elif last_house == house:
             if last_turn == 1:
-                player1.get_house_banner(house)
-                player2.remove_house_banner(house)
+                # Give the banner to player 1
+                selected_player = 1
             
             else:
-                player2.get_house_banner(house)
-                player1.remove_house_banner(house)
+                # Give the banner to player 2
+                selected_player = 2
+        
+        # If player 1 should get the banner
+        if selected_player == 1:
+            # Give the banner to player 1
+            player1.get_house_banner(house)
+            player2.remove_house_banner(house)
 
-def print_banners(player1, player2):
+            # Set the status of the cards
+            player1_status[house] = len(player1_cards[house]), 'Green'
+            player2_status[house] = len(player2_cards[house]), 'White'
+        
+        else:
+            # Give the banner to player 2
+            player2.get_house_banner(house)
+            player1.remove_house_banner(house)
+
+            # Set the status of the cards
+            player1_status[house] = len(player1_cards[house]), 'White'
+            player2_status[house] = len(player2_cards[house]), 'Green'
+    
+    return player1_status, player2_status
+
+def clear_screen():
     '''
-    This function prints the banners of the players.
+    This function clears the screen.
+    '''
+
+    if os_name == 'nt': # Windows
+        os_system('cls')
+    
+    else: # Mac and Linux
+        os_system('clear')
+
+def print_cards_status(player1_status, player2_status):
+    '''
+    This function prints the status of cards of the players.
 
     Parameters:
-        player1 (Player): player 1
-        player2 (Player): player 2
+        player1_status (dict): status of the cards for player 1
+        player2_status (dict): status of the cards for player 2
     '''
 
     # Clear the screen
-    if os_name == 'nt':
-        os_system('cls')
-    
-    else:
-        os_system('clear')
+    clear_screen()
 
-    print("Player 1's banners:", player1.get_banners())
-    print("Player 2's banners:", player2.get_banners())
+    # Print the status of the cards
+    print("Player 1 cards status:", end=' ')
+    for house, status in player1_status.items():
+        try:
+            # If player 1 has the banner of the house
+            if status[1] == 'Green':
+                # Print the house in color green
+                print(f"\033[92m{house}: {status[0]}\033[0m", end=' ')
+            
+            else:
+                # Print the house in color white
+                print(f"\033[97m{house}: {status[0]}\033[0m", end=' ')
+        
+        except:
+            print(f"{house}: {status[0]}", end=' ')
+    
+    print()
+
+    print("Player 2 cards status:", end=' ')
+    for house, status in player2_status.items():
+        try:
+            # If player 2 has the banner of the house
+            if status[1] == 'Green':
+                # Print the house in color green
+                print(f"\033[92m{house}: {status[0]}\033[0m", end=' ')
+            
+            else:
+                # Print the house in color white
+                print(f"\033[97m{house}: {status[0]}\033[0m", end=' ')
+        
+        except:
+            print(f"{house}: {status[0]}", end=' ')
 
 def try_get_move(agent, cards, player1, player2):
     '''
@@ -413,6 +482,9 @@ def main(args):
     # Set up the graphics
     board = pygraphics.init_board()
 
+    # Clear the screen
+    clear_screen()
+
     # Draw the board
     pygraphics.draw_board(board, cards, '0')
 
@@ -471,9 +543,6 @@ def main(args):
             
             # Get the winner of the game
             winner = calculate_winner(player1, player2)
-
-            # Print each player's banners
-            print_banners(player1, player2)
             
             # Display the winner
             pygraphics.display_winner(board, winner, player1.get_agent() if winner == 1 else player2.get_agent())
@@ -518,10 +587,10 @@ def main(args):
             selected_house = make_move(cards, move, player1 if turn == 1 else player2)
 
             # Set the banners for the players
-            set_banners(player1, player2, selected_house, turn)
+            player1_status, player2_status = set_banners(player1, player2, selected_house, turn)
 
-            # Print each player's banners
-            print_banners(player1, player2)
+            # Print the status of the cards
+            print_cards_status(player1_status, player2_status)
 
             # Change the turn
             turn = 2 if turn == 1 else 1
