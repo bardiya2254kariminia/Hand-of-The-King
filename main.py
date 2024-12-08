@@ -301,6 +301,7 @@ def make_move(cards, move, player):
     # Return the selected card's house
     return selected_card.get_house()
 
+
 def set_banners(player1, player2, last_house, last_turn):
     '''
     This function sets the banners for the players.
@@ -310,7 +311,7 @@ def set_banners(player1, player2, last_house, last_turn):
         player2 (Player): player 2
         last_house (str): house of the last chosen card
         last_turn (int): last turn of the player
-    
+
     Returns:
         player1_status (dict): status of the cards for player 1
         player2_status (dict): status of the cards for player 2
@@ -319,6 +320,10 @@ def set_banners(player1, player2, last_house, last_turn):
     # Get the cards of the players
     player1_cards = player1.get_cards()
     player2_cards = player2.get_cards()
+
+    # Get the cards of the players
+    player1_banners = player1.get_banners()
+    player2_banners = player2.get_banners()
 
     # Initialize the status of the cards
     player1_status = {}
@@ -332,21 +337,28 @@ def set_banners(player1, player2, last_house, last_turn):
         if len(player1_cards[house]) > len(player2_cards[house]):
             # Give the banner to player 1
             selected_player = 1
-        
+
         elif len(player2_cards[house]) > len(player1_cards[house]):
             # Give the banner to player 2
             selected_player = 2
-        
+
         # If the number of cards is the same, the player who chose the last card of that house gets the banner
-        elif last_house == house:
-            if last_turn == 1:
-                # Give the banner to player 1
-                selected_player = 1
-            
+        else:
+            if last_house == house:
+                if last_turn == 1:
+                    # Give the banner to player 1
+                    selected_player = 1
+
+                else:
+                    # Give the banner to player 2
+                    selected_player = 2
+
             else:
-                # Give the banner to player 2
-                selected_player = 2
-        
+                if player1_banners[house] > player2_banners[house]:
+                    selected_player = 1
+                elif player2_banners[house] > player1_banners[house]:
+                    selected_player = 2
+
         # If player 1 should get the banner
         if selected_player == 1:
             # Give the banner to player 1
@@ -356,27 +368,32 @@ def set_banners(player1, player2, last_house, last_turn):
             # Set the status of the cards
             if len(player1_cards[house]) != 0:
                 player1_status[house] = len(player1_cards[house]), 'Green'
-            
+
             else:
                 player1_status[house] = len(player1_cards[house]), 'White'
-            
+
             player2_status[house] = len(player2_cards[house]), 'White'
-        
-        else:
+
+        elif selected_player == 2:
             # Give the banner to player 2
-            player2.get_house_banner(house)
             player1.remove_house_banner(house)
+            player2.get_house_banner(house)
 
             # Set the status of the cards
             if len(player2_cards[house]) != 0:
                 player2_status[house] = len(player2_cards[house]), 'Green'
-            
+
             else:
                 player2_status[house] = len(player2_cards[house]), 'White'
-            
+
             player1_status[house] = len(player1_cards[house]), 'White'
-    
+
+        else:
+            player2_status[house] = len(player2_cards[house]), 'White'
+            player1_status[house] = len(player1_cards[house]), 'White'
+
     return player1_status, player2_status
+
 
 def clear_screen():
     '''
@@ -589,7 +606,7 @@ def main(args):
             
             else:
                 # Get the move from the AI agent
-                move = try_get_move(player2_agent, cards, player2, player1)
+                move = try_get_move(player2_agent, cards, player1, player2)
 
                 # If the move is None, change the turn
                 if move is None:
