@@ -301,7 +301,6 @@ def make_move(cards, move, player):
     # Return the selected card's house
     return selected_card.get_house()
 
-
 def set_banners(player1, player2, last_house, last_turn):
     '''
     This function sets the banners for the players.
@@ -321,7 +320,7 @@ def set_banners(player1, player2, last_house, last_turn):
     player1_cards = player1.get_cards()
     player2_cards = player2.get_cards()
 
-    # Get the cards of the players
+    # Get the banners of the players
     player1_banners = player1.get_banners()
     player2_banners = player2.get_banners()
 
@@ -353,10 +352,11 @@ def set_banners(player1, player2, last_house, last_turn):
                     # Give the banner to player 2
                     selected_player = 2
 
-            else:
-                if player1_banners[house] > player2_banners[house]:
+            else: # If the last card was not of the same house
+                if player1_banners[house] > player2_banners[house]: # If player 1 has more banners of the house
                     selected_player = 1
-                elif player2_banners[house] > player1_banners[house]:
+                
+                elif player2_banners[house] > player1_banners[house]: # If player 2 has more banners of the house
                     selected_player = 2
 
         # If player 1 should get the banner
@@ -388,12 +388,11 @@ def set_banners(player1, player2, last_house, last_turn):
 
             player1_status[house] = len(player1_cards[house]), 'White'
 
-        else:
+        else: # If no player has the banner
             player2_status[house] = len(player2_cards[house]), 'White'
             player1_status[house] = len(player1_cards[house]), 'White'
 
     return player1_status, player2_status
-
 
 def clear_screen():
     '''
