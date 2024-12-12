@@ -63,6 +63,27 @@ def get_move(cards, player1, player2):
     Returns:
         move (int): the move of the player
     """
+    print(player1, player2)
+    best_move = get_best_move(cards, player1, player2)
+    return best_move
 
-    moves = get_valid_moves(cards)
-    return random.choice(moves)
+
+def get_best_move(cards, player1, player2, max_depth=4):
+    """
+    getting the best move for 4 depth from now
+    approximate d:
+    d[4] : 14.6 s
+    d[5] : 161 s
+    """
+    valid_moves = get_valid_moves(cards)
+    for moves in valid_moves:
+        print(moves)
+        # TODO
+
+
+def get_huristics(cards, player, player1, player2):
+    """
+    finding the huristics for the given situation and the player
+    """
+    # TODO
+    pass
