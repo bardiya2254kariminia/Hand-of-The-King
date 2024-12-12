@@ -1,0 +1,35 @@
+2 player game
+turn based
+35 card
+randomly shuffled on a 6 by 6 grid
+each card belongs to a house which is represented by a logo and color on side of the card
+number of cards for each house:
+    starks : 8
+    grayjoy : 7
+    lanicter : 6
+    targerian : 5
+    baration : 4
+    tyrel : 3
+    taly : 2
+
+homeless:
+    varys : 1
+
+the goal is to collect tokens.
+
+in each turn varys moves in one of four directions and replaces a card
+
+
+
+
+heuristics(base):
+getting the fewer hoses cards are better 
+
+
+
+
+
+
+
+
+
