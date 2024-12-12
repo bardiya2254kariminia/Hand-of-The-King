@@ -20,3 +20,16 @@ the goal is to collect tokens.
 in each turn varys moves in one of four directions and replaces a card
 
 
+
+
+heuristics(base):
+getting the fewer hoses cards are better 
+
+
+
+
+
+
+
+
+
