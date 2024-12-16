@@ -1,4 +1,7 @@
 import random
+from time import sleep
+from main import *
+from utils.classes import *
 
 
 def find_varys(cards):
@@ -64,26 +67,69 @@ def get_move(cards, player1, player2):
         move (int): the move of the player
     """
     print(player1, player2)
-    best_move = get_best_move(cards, player1, player2)
+    best_move = get_best_move(cards, player1, player2, player=player1)
     return best_move
 
 
-def get_best_move(cards, player1, player2, max_depth=4):
+def get_best_move(cards, player1, player2, player, max_depth=4):
     """
     getting the best move for 4 depth from now
     approximate d:
     d[4] : 14.6 s
     d[5] : 161 s
+    player1 : maximizer
+    player2 : minimizer
     """
+
     valid_moves = get_valid_moves(cards)
+    print(cards)
     for moves in valid_moves:
         print(moves)
+        sleep(1.5)
         # TODO
 
 
-def get_huristics(cards, player, player1, player2):
+def get_huristics(cards, player: Player, player1: Player, player2: Player):
     """
     finding the huristics for the given situation and the player
     """
-    # TODO
-    pass
+    # {'Stark': [8], 'Greyjoy': [7], 'Lannister': [6], 'Targaryen': [5], 'Baratheon': [4], 'Tyrell': [3], 'Tully': [2]}
+    # for player 1
+    Stark1 = len(player1.cards["Stark"])
+    Greyjoy1 = len(player1.cards["Greyjoy"])
+    Lannister1 = len(player1.cards["Lannister"])
+    Targaryen1 = len(player1.cards["Targaryen"])
+    Baratheon1 = len(player1.cards["Baratheon"])
+    Tyrell1 = len(player1.cards["Tyrell"])
+    Tully1 = len(player1.cards["Tully"])
+    # for player 2
+    Stark2 = len(player2.cards["Stark"])
+    Greyjoy2 = len(player2.cards["Greyjoy"])
+    Lannister2 = len(player2.cards["Lannister"])
+    Targaryen2 = len(player2.cards["Targaryen"])
+    Baratheon2 = len(player2.cards["Baratheon"])
+    Tyrell2 = len(player2.cards["Tyrell"])
+    Tully2 = len(player2.cards["Tully"])
+
+    lambda_Stark = 0 if Stark1 + Stark2 >= 6 else (Stark1 + Stark2) / 5
+    lambda_Greyjoy = 0 if Greyjoy1 + Greyjoy2 >= 5 else (Greyjoy1 + Greyjoy2) / 4
+    lambda_Lannister = (
+        0 if Lannister1 + Lannister2 >= 4 else (Lannister1 + Lannister2) / 4
+    )
+    lambda_Targaryen = (
+        0 if Targaryen1 + Targaryen2 >= 4 else (Targaryen1 + Targaryen2) / 3
+    )
+    lambda_Baratheon = (
+        0 if Baratheon1 + Baratheon2 >= 3 else (Baratheon1 + Baratheon2) / 3
+    )
+    lambda_Tyrell = 0 if Tyrell1 + Tyrell2 >= 3 else (Tyrell1 + Tyrell2) / 2
+    lambda_Tully = 0 if Tully1 + Tully2 >= 2 else (Tully1 + Tully2) / 1
+    return (
+        ((Stark1 - Stark2) / 8) * (lambda_Stark)
+        + ((Greyjoy1 - Greyjoy2) / 7) * (lambda_Greyjoy)
+        + ((Lannister1 - Lannister2) / 6) * (lambda_Lannister)
+        + ((Targaryen1 - Targaryen2) / 5) * (lambda_Targaryen)
+        + ((Baratheon1 - Baratheon2) / 4) * (lambda_Baratheon)
+        + ((Tyrell1 - Tyrell2) / 3) * (lambda_Tyrell)
+        + ((Tully1 - Tully2) / 2) * (lambda_Tully)
+    )
