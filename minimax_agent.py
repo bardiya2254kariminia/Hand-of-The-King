@@ -1,6 +1,7 @@
 import random
 from time import sleep
-from main import *
+from main import make_move
+import copy
 from utils.classes import *
 
 
@@ -66,12 +67,12 @@ def get_move(cards, player1, player2):
     Returns:
         move (int): the move of the player
     """
-    print(player1, player2)
-    best_move = get_best_move(cards, player1, player2, player=player1)
+    # print(player1, player2)
+    val, best_move = get_best_move(cards, player1, player2, player=player1, depth=0)
     return best_move
 
 
-def get_best_move(cards, player1, player2, player, max_depth=4):
+def get_best_move(cards, player1, player2, player, depth, max_depth=4):
     """
     getting the best move for 4 depth from now
     approximate d:
@@ -80,13 +81,56 @@ def get_best_move(cards, player1, player2, player, max_depth=4):
     player1 : maximizer
     player2 : minimizer
     """
+    if depth > 4:
 
-    valid_moves = get_valid_moves(cards)
-    print(cards)
-    for moves in valid_moves:
-        print(moves)
-        sleep(1.5)
-        # TODO
+        return (
+            get_huristics(
+                cards=cards,
+                player=player,
+                player1=player1,
+                player2=player2,
+            ),
+            None,
+        )
+
+    if player == player1:
+        # maximizer player
+        ans = -1e8
+        best_move = None
+        valid_moves = get_valid_moves(cards)
+        for move in valid_moves:
+            temp_cards = copy.deepcopy(cards)
+            make_move(cards=temp_cards, move=move, player=player)
+            h_move, _ = get_best_move(
+                cards=temp_cards,
+                player1=player1,
+                player2=player2,
+                player=player2,
+                depth=depth + 1,
+            )
+            del temp_cards
+            if ans < h_move:
+                ans, best_move = h_move, move
+        return ans, best_move
+    else:
+        # minimizer player
+        ans = 1e8
+        best_move = None
+        valid_moves = get_valid_moves(cards)
+        for move in valid_moves:
+            temp_cards = copy.deepcopy(cards)
+            make_move(cards=temp_cards, move=move, player=player)
+            h_move, _ = get_best_move(
+                cards=temp_cards,
+                player1=player1,
+                player2=player2,
+                player=player1,
+                depth=depth + 1,
+            )
+            del temp_cards
+            if ans > h_move:
+                ans, best_move = h_move, move
+        return ans, best_move
 
 
 def get_huristics(cards, player: Player, player1: Player, player2: Player):
