@@ -258,7 +258,7 @@ def find_card(cards, location):
             return card
 
 
-def make_move(cards, move, player):
+def make_move(cards, move, player, other_player):
     """
     This function makes a move for the player.
 
@@ -287,7 +287,6 @@ def make_move(cards, move, player):
         if cards[i].get_name() == "Varys":
             varys_index = i
             continue
-
         # If the card is between Varys and the selected card and has the same house as the selected card
         if varys_row == move_row and varys_col < move_col:
             if (
@@ -298,6 +297,8 @@ def make_move(cards, move, player):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
 
         elif varys_row == move_row and varys_col > move_col:
@@ -309,6 +310,8 @@ def make_move(cards, move, player):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
 
         elif varys_col == move_col and varys_row < move_row:
@@ -320,6 +323,8 @@ def make_move(cards, move, player):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
 
         elif varys_col == move_col and varys_row > move_row:
@@ -331,15 +336,20 @@ def make_move(cards, move, player):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
 
     # Add the selected card to the player's cards
     player.add_card(selected_card)
+    player.flip_last(selected_card, 1)
+    other_player.flip_last(selected_card, 0)
 
     # Set the location of Varys
     cards[varys_index].set_location(move)
 
     # Remove the cards
+    print(removing_cards)
     for card in removing_cards:
         cards.remove(card)
 
@@ -575,7 +585,7 @@ def main(args):
     board = pygraphics.init_board()
 
     # Clear the screen
-    clear_screen()
+    # clear_screen()
 
     # Draw the board
     pygraphics.draw_board(board, cards, "0")
@@ -680,7 +690,7 @@ def main(args):
         # Check if the move is valid
         if move in moves:
             # Make the move
-            selected_house = make_move(cards, move, player1 if turn == 1 else player2)
+            selected_house = make_move(cards, move, player1 if turn == 1 else player2, player2 if turn == 1 else player1)
 
             # Set the banners for the players
             player1_status, player2_status = set_banners(
@@ -689,6 +699,13 @@ def main(args):
 
             # Print the status of the cards
             print_cards_status(player1_status, player2_status)
+            print(player1.last)
+            print('\n')
+            print(player2.last)
+            print('\n')            
+            print(player1.cards)
+            print('\n')
+            print(player2.cards)
 
             # Change the turn
             turn = 2 if turn == 1 else 1

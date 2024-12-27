@@ -68,7 +68,8 @@ def get_move(cards, player1, player2):
         move (int): the move of the player
     """
     # print(player1, player2)
-    val, best_move = get_best_move(cards, player1, player2, player=player1, depth=0)
+    val, best_move = get_best_move(
+        cards, player1, player2, player=player1, depth=0)
     return best_move
 
 
@@ -100,7 +101,7 @@ def get_best_move(cards, player1, player2, player, depth, max_depth=4):
         valid_moves = get_valid_moves(cards)
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player)
+            make_move(cards=temp_cards, move=move, player=player, other_player=player2)
             h_move, _ = get_best_move(
                 cards=temp_cards,
                 player1=player1,
@@ -119,7 +120,7 @@ def get_best_move(cards, player1, player2, player, depth, max_depth=4):
         valid_moves = get_valid_moves(cards)
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player)
+            make_move(cards=temp_cards, move=move, player=player, other_player=player1)
             h_move, _ = get_best_move(
                 cards=temp_cards,
                 player1=player1,
@@ -155,25 +156,81 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
     Tyrell2 = len(player2.cards["Tyrell"])
     Tully2 = len(player2.cards["Tully"])
 
-    lambda_Stark = 0 if Stark1 + Stark2 >= 6 else (Stark1 + Stark2) / 5
-    lambda_Greyjoy = 0 if Greyjoy1 + Greyjoy2 >= 5 else (Greyjoy1 + Greyjoy2) / 4
-    lambda_Lannister = (
-        0 if Lannister1 + Lannister2 >= 4 else (Lannister1 + Lannister2) / 4
-    )
-    lambda_Targaryen = (
-        0 if Targaryen1 + Targaryen2 >= 4 else (Targaryen1 + Targaryen2) / 3
-    )
-    lambda_Baratheon = (
-        0 if Baratheon1 + Baratheon2 >= 3 else (Baratheon1 + Baratheon2) / 3
-    )
-    lambda_Tyrell = 0 if Tyrell1 + Tyrell2 >= 3 else (Tyrell1 + Tyrell2) / 2
-    lambda_Tully = 0 if Tully1 + Tully2 >= 2 else (Tully1 + Tully2) / 1
-    return (
-        ((Stark1 - Stark2) / 8) * (lambda_Stark)
-        + ((Greyjoy1 - Greyjoy2) / 7) * (lambda_Greyjoy)
-        + ((Lannister1 - Lannister2) / 6) * (lambda_Lannister)
-        + ((Targaryen1 - Targaryen2) / 5) * (lambda_Targaryen)
-        + ((Baratheon1 - Baratheon2) / 4) * (lambda_Baratheon)
-        + ((Tyrell1 - Tyrell2) / 3) * (lambda_Tyrell)
-        + ((Tully1 - Tully2) / 2) * (lambda_Tully)
-    )
+    stark_sum = Stark1 + Stark2
+    greyjoy_sum = Greyjoy1 + Greyjoy2
+    lannister_sum = Lannister1 + Lannister2
+    targaryen_sum = Targaryen1 + Targaryen2
+    baratheon_sum = Baratheon1 + Baratheon2
+    tyrell_sum = Tyrell1 + Tyrell2
+    tully_sum = Tully1 + Tully2
+
+    p1score = 0
+    p2score = 0
+
+    # tully hue
+    if tully_sum == 2:
+        if player1.last["Tully"] == 1:
+            p1score += 1
+        else:
+            p2score += 1
+
+    # tyrell hue
+    if tyrell_sum == 3:
+        if Tyrell1 == 2:
+            p1score += 1
+        else:
+            p2score += 1
+    else:
+        p1score += Tyrell1 / 2
+        p2score += Tyrell2 / 2
+    
+    # baratheon hue
+    if baratheon_sum == 4 or Baratheon1 > 2 or Baratheon2 > 2:
+        if Baratheon1 > 2 or (Baratheon1 == 2 and player1.last["Baratheon"] == 1):
+            p1score += 1
+        else:
+            p2score += 1
+    elif baratheon_sum < 3:
+            p1score += Baratheon1 / 2
+            p2score += Baratheon2 / 2
+
+    # targaryen hue
+    if targaryen_sum == 5 or Targaryen1 > 2 or Targaryen2 > 2:
+        if Targaryen1 > 2:
+            p1score += 1
+        else:
+            p2score += 1
+    else:
+        p1score += Targaryen1 / 3
+        p2score += Targaryen2 / 3
+    # lannister hue
+    if lannister_sum == 6 or Lannister1 > 3 or Lannister2 > 3:
+        if Lannister1 > 3 or (Lannister1 == 3 and player1.last["Lannister"] == 1):
+            p1score += 1
+        else:
+            p2score += 1
+    elif lannister_sum < 5:
+            p1score += Lannister1 / 4
+            p2score += Lannister2 / 4
+
+    # greyjoy hue
+    if greyjoy_sum == 7 or Greyjoy1 > 3 or Greyjoy2 > 3:
+        if Greyjoy1 > 3:
+            p1score += 1
+        else:
+            p2score += 1
+    else:
+        p1score += Greyjoy1 / 4
+        p2score += Greyjoy2 / 4
+    
+    # stark hue
+    if stark_sum == 8 or Stark1 > 4 or Stark2 > 4:
+        if Stark1 > 4 or (Stark1 == 4 and player1.last["Stark"] == 1):
+            p1score += 1
+        else:
+            p2score += 1
+    elif stark_sum < 7:
+        p1score += Stark1 / 4
+        p2score += Stark2 / 4
+    
+
