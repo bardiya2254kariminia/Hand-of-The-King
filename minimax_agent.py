@@ -74,6 +74,8 @@ def get_move(cards, player1, player2):
         max_depth = 5
     elif num_cards < 20:
         max_depth = 20
+    elif  num_cards < 16:
+        max_depth = 100
     val, best_move = get_best_move(
         cards, player1, player2, player=player1, depth=0, max_depth=max_depth)
     return best_move
@@ -196,7 +198,7 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     win_points = 10
     diif_mull = 1.2
 
-    if ended: 
+    if ended == True: 
         if Stark1 > Stark2 or (Stark1 == Stark2 and player1.last["Stark"] == 1):
             p1score += win_points
         elif Stark2 > Stark1 or (Stark2 == Stark2 and player2.last["Stark"] == 1):
@@ -230,10 +232,15 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
             p1score += 1
         elif p1score == p2score and player2.last["Stark"] == 1:
             p2score += 1
-        return (p1score - p2score) * 1000
+        # if p1score > p2score:
+        #     print(p1score - p2score)
+        if p1score > p2score:
+            return 80;
+        else:
+            return -80;
 
     def f(num):
-        return num * (num + 1) / 2
+        return (num * (num + 1)) / 2
 
     # tully hue
     if tully_sum == 2:
@@ -300,6 +307,6 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     elif stark_sum < 7:
         p1score += max(0, diif_mull * (f(Stark1) / 4) - f(Stark2) / 4)
         p2score += max(0, diif_mull * (f(Stark2) / 4) - f(Stark1) / 4)
+    # if p1score > p2score:
+    #     print(p1score - p2score)
     return p1score - p2score
-    
-
