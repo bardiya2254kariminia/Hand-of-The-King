@@ -699,13 +699,6 @@ def main(args):
 
             # Print the status of the cards
             print_cards_status(player1_status, player2_status)
-            print(player1.last)
-            print('\n')
-            print(player2.last)
-            print('\n')            
-            print(player1.cards)
-            print('\n')
-            print(player2.cards)
 
             # Change the turn
             turn = 2 if turn == 1 else 1

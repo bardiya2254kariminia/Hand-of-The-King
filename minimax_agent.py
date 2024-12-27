@@ -82,7 +82,7 @@ def get_best_move(cards, player1, player2, player, depth, max_depth=4):
     player1 : maximizer
     player2 : minimizer
     """
-    if depth > 4:
+    if depth > max_depth:
 
         return (
             get_huristics(
@@ -166,20 +166,21 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
 
     p1score = 0
     p2score = 0
+    win_points = 10
 
     # tully hue
     if tully_sum == 2:
         if player1.last["Tully"] == 1:
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
 
     # tyrell hue
     if tyrell_sum == 3:
         if Tyrell1 == 2:
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     else:
         p1score += Tyrell1 / 2
         p2score += Tyrell2 / 2
@@ -187,9 +188,9 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
     # baratheon hue
     if baratheon_sum == 4 or Baratheon1 > 2 or Baratheon2 > 2:
         if Baratheon1 > 2 or (Baratheon1 == 2 and player1.last["Baratheon"] == 1):
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     elif baratheon_sum < 3:
             p1score += Baratheon1 / 2
             p2score += Baratheon2 / 2
@@ -197,18 +198,18 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
     # targaryen hue
     if targaryen_sum == 5 or Targaryen1 > 2 or Targaryen2 > 2:
         if Targaryen1 > 2:
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     else:
         p1score += Targaryen1 / 3
         p2score += Targaryen2 / 3
     # lannister hue
     if lannister_sum == 6 or Lannister1 > 3 or Lannister2 > 3:
         if Lannister1 > 3 or (Lannister1 == 3 and player1.last["Lannister"] == 1):
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     elif lannister_sum < 5:
             p1score += Lannister1 / 4
             p2score += Lannister2 / 4
@@ -216,9 +217,9 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
     # greyjoy hue
     if greyjoy_sum == 7 or Greyjoy1 > 3 or Greyjoy2 > 3:
         if Greyjoy1 > 3:
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     else:
         p1score += Greyjoy1 / 4
         p2score += Greyjoy2 / 4
@@ -226,11 +227,12 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player):
     # stark hue
     if stark_sum == 8 or Stark1 > 4 or Stark2 > 4:
         if Stark1 > 4 or (Stark1 == 4 and player1.last["Stark"] == 1):
-            p1score += 1
+            p1score += win_points
         else:
-            p2score += 1
+            p2score += win_points
     elif stark_sum < 7:
         p1score += Stark1 / 4
         p2score += Stark2 / 4
+    return p1score - p2score
     
 
