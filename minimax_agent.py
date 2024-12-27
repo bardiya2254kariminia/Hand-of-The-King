@@ -133,7 +133,7 @@ def get_best_move(cards, player1, player2, player, depth, max_depth=4):
         return ans, best_move
 
 
-def get_huristics(cards, player: Player, player1: Player, player2: Player):
+def get_huristics(cards,player: Player, player1: Player, player2: Player):
     """
     finding the huristics for the given situation and the player
     """
