@@ -349,7 +349,7 @@ def make_move(cards, move, player, other_player):
     cards[varys_index].set_location(move)
 
     # Remove the cards
-    print(removing_cards)
+    # print(removing_cards)
     for card in removing_cards:
         cards.remove(card)
 
@@ -699,6 +699,7 @@ def main(args):
 
             # Print the status of the cards
             print_cards_status(player1_status, player2_status)
+            # print(len(cards))
 
             # Change the turn
             turn = 2 if turn == 1 else 1
