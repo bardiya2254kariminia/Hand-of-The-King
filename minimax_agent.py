@@ -120,16 +120,20 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player, other_player=player2)
+            temp_player1 = copy.deepcopy(player1)
+            temp_player2 = copy.deepcopy(player2)
+            make_move(cards=temp_cards, move=move, player=temp_player1, other_player=temp_player2)
             h_move, _ = get_best_move(
                 cards=temp_cards,
-                player1=player1,
-                player2=player2,
-                player=player2,
+                player1=temp_player1,
+                player2=temp_player2,
+                player=temp_player2,
                 depth=depth + 1,
                 max_depth=max_depth,
             )
             del temp_cards
+            del temp_player1
+            del temp_player2
             if ans < h_move:
                 ans, best_move = h_move, move
         return ans, best_move
@@ -148,16 +152,20 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player, other_player=player1)
+            temp_player1 = copy.deepcopy(player1)
+            temp_player2 = copy.deepcopy(player2)
+            make_move(cards=temp_cards, move=move, player=temp_player2, other_player=temp_player1)
             h_move, _ = get_best_move(
                 cards=temp_cards,
-                player1=player1,
-                player2=player2,
-                player=player1,
+                player1=temp_player1,
+                player2=temp_player2,
+                player=temp_player1,
                 depth=depth + 1,
                 max_depth=max_depth,
             )
             del temp_cards
+            del temp_player1
+            del temp_player2
             if ans > h_move:
                 ans, best_move = h_move, move
         return ans, best_move
