@@ -70,12 +70,6 @@ def get_move(cards, player1, player2):
     # print(player1, player2)
     num_cards = len(cards)
     max_depth = 4
-    if num_cards < 25:
-        max_depth = 5
-    elif num_cards < 20:
-        max_depth = 20
-    elif  num_cards < 16:
-        max_depth = 100
     val, best_move = get_best_move(
         cards, player1, player2, player=player1, depth=0, max_depth=max_depth)
     return best_move
@@ -91,7 +85,7 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
     player2 : minimizer
     """
     # print(max_depth)
-    
+
     if depth > max_depth:
 
         return (
@@ -120,7 +114,8 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player, other_player=player2)
+            make_move(cards=temp_cards, move=move,
+                      player=player, other_player=player2)
             h_move, _ = get_best_move(
                 cards=temp_cards,
                 player1=player1,
@@ -148,7 +143,8 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
-            make_move(cards=temp_cards, move=move, player=player, other_player=player1)
+            make_move(cards=temp_cards, move=move,
+                      player=player, other_player=player1)
             h_move, _ = get_best_move(
                 cards=temp_cards,
                 player1=player1,
@@ -160,7 +156,13 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             del temp_cards
             if ans > h_move:
                 ans, best_move = h_move, move
+        print(ans)
         return ans, best_move
+
+
+def f(num):
+    return num
+    # return (num * (num + 1)) / 2
 
 
 def get_huristics(cards, player: Player, player1: Player, player2: Player, ended):
@@ -185,6 +187,13 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     Tyrell2 = len(player2.cards["Tyrell"])
     Tully2 = len(player2.cards["Tully"])
 
+    print(len(cards))
+
+    print(Stark1, Greyjoy1, Lannister1, Targaryen1,
+          Baratheon1, Tyrell1, Tully1, '\n')
+    print(Stark2, Greyjoy2, Lannister2, Targaryen2,
+          Baratheon2, Tyrell2, Tully2, '\n')
+
     stark_sum = Stark1 + Stark2
     greyjoy_sum = Greyjoy1 + Greyjoy2
     lannister_sum = Lannister1 + Lannister2
@@ -198,7 +207,7 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     win_points = 10
     diif_mull = 1.2
 
-    if ended == True: 
+    if ended == True:
         if Stark1 > Stark2 or (Stark1 == Stark2 and player1.last["Stark"] == 1):
             p1score += win_points
         elif Stark2 > Stark1 or (Stark2 == Stark2 and player2.last["Stark"] == 1):
@@ -235,12 +244,9 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
         # if p1score > p2score:
         #     print(p1score - p2score)
         if p1score > p2score:
-            return 80;
+            return 80
         else:
-            return -80;
-
-    def f(num):
-        return (num * (num + 1)) / 2
+            return -80
 
     # tully hue
     if tully_sum == 2:
@@ -258,7 +264,7 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     else:
         p1score += max(0, diif_mull * (f(Tyrell1) * 2) - f(Tyrell2) * 2)
         p2score += max(0, diif_mull * (f(Tyrell2) * 2) - f(Tyrell1) * 2)
-    
+
     # baratheon hue
     if baratheon_sum == 4 or Baratheon1 > 2 or Baratheon2 > 2:
         if Baratheon1 > 2 or (Baratheon1 == 2 and player1.last["Baratheon"] == 1):
@@ -266,8 +272,8 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
         else:
             p2score += win_points
     elif baratheon_sum < 3:
-            p1score += max(0, diif_mull * (f(Baratheon1)) - f(Baratheon2))
-            p2score += max(0, diif_mull * (f(Baratheon2)) - f(Baratheon1))
+        p1score += max(0, diif_mull * (f(Baratheon1)) - f(Baratheon2))
+        p2score += max(0, diif_mull * (f(Baratheon2)) - f(Baratheon1))
 
     # targaryen hue
     if targaryen_sum == 5 or Targaryen1 > 2 or Targaryen2 > 2:
@@ -285,8 +291,8 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
         else:
             p2score += win_points
     elif lannister_sum < 5:
-            p1score += max(0, diif_mull * (f(Lannister1) / 4) - f(Lannister2) / 4)
-            p2score += max(0, diif_mull * (f(Lannister2) / 4) - Lannister1 / 4)
+        p1score += max(0, diif_mull * (f(Lannister1) / 4) - f(Lannister2) / 4)
+        p2score += max(0, diif_mull * (f(Lannister2) / 4) - Lannister1 / 4)
 
     # greyjoy hue
     if greyjoy_sum == 7 or Greyjoy1 > 3 or Greyjoy2 > 3:
@@ -297,7 +303,7 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     else:
         p1score += max(0, diif_mull * (f(Greyjoy1) / 4) - f(Greyjoy2) / 4)
         p2score += max(0, diif_mull * (f(Greyjoy2) / 4) - f(Greyjoy1) / 4)
-    
+
     # stark hue
     if stark_sum == 8 or Stark1 > 4 or Stark2 > 4:
         if Stark1 > 4 or (Stark1 == 4 and player1.last["Stark"] == 1):

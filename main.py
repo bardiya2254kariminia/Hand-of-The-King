@@ -14,7 +14,7 @@ sys.path.append(join(dirname(abspath(__file__)), "utils"))
 
 # Import the utils
 import pygraphics
-from classes import Card, Player
+from utils.classes import Card, Player
 
 # Set the path of the file
 path = dirname(abspath(__file__))
@@ -553,166 +553,176 @@ def try_get_move(agent, cards, player1, player2):
 
 
 def main(args):
+    p1win = 0
+    p2win = 0
     """
     This function runs the game.
 
     Parameters:
         args (Namespace): command line arguments
     """
+    for no in range(200):
+        if args.load:
+            try:
+                # Load the board from the file
+                cards = load_board(args.load)
 
-    if args.load:
-        try:
-            # Load the board from the file
-            cards = load_board(args.load)
-
-        except FileNotFoundError:
-            print("File not found. Creating a new board.")
-            cards = make_board()
-
-    else:
-        # Create a new board
-        cards = make_board()
-
-    if args.save:
-        try:
-            # Save the board to the file
-            save_board(cards, args.save)
-
-        except:
-            print("Error saving board.")
-
-    # Set up the graphics
-    board = pygraphics.init_board()
-
-    # Clear the screen
-    # clear_screen()
-
-    # Draw the board
-    pygraphics.draw_board(board, cards, "0")
-
-    # Show the initial board for 2 seconds
-    pygraphics.show_board(2)
-
-    # Check if the players are human or AI
-    if args.player1 == "human":
-        player1_agent = None
-
-    else:
-        # Check if the AI file exists
-        try:
-            player1_agent = importlib.import_module(args.player1)
-
-        except ImportError:
-            print("AI file not found.")
-            return
-
-        if not hasattr(player1_agent, "get_move"):
-            print("AI file does not have the get_move function.")
-            return
-
-    if args.player2 == "human":
-        player2_agent = None
-
-    else:
-        # Check if the AI file exists
-        try:
-            player2_agent = importlib.import_module(args.player2)
-
-        except ImportError:
-            print("AI file not found.")
-            return
-
-        if not hasattr(player2_agent, "get_move"):
-            print("AI file does not have the get_move function.")
-            return
-
-    # Set up the players
-    player1 = Player(args.player1)
-    player2 = Player(args.player2)
-
-    # Set up the turn
-    turn = 1  # 1: player 1's turn, 2: player 2's turn
-
-    # Draw the board
-    pygraphics.draw_board(board, cards, "1")
-
-    while True:
-        # Check the possible moves for the player
-        moves = get_possible_moves(cards)
-
-        # Check if the game is over
-        if len(moves) == 0:
-
-            # Get the winner of the game
-            winner = calculate_winner(player1, player2)
-
-            # Display the winner
-            pygraphics.display_winner(
-                board,
-                winner,
-                player1.get_agent() if winner == 1 else player2.get_agent(),
-            )
-
-            # Show the board for 5 seconds
-            pygraphics.show_board(5)
-
-            break
-
-        # Get the player's move
-        if turn == 1:
-            # Check if the player is human or AI
-            if player1_agent is None:
-                # Wait for the player to make a move with the mouse
-                move = pygraphics.get_player_move()
-
-            else:
-                # Get the move from the AI agent
-                move = try_get_move(player1_agent, cards, player1, player2)
-
-                # If the move is None, change the turn
-                if move is None:
-                    turn = 2
+            except FileNotFoundError:
+                print("File not found. Creating a new board.")
+                cards = make_board()
 
         else:
-            # Check if the player is human or AI
-            if player2_agent is None:
-                # Wait for the player to make a move with the mouse
-                move = pygraphics.get_player_move()
+            # Create a new board
+            cards = make_board()
 
-            else:
-                # Get the move from the AI agent
-                move = try_get_move(player2_agent, cards, player1, player2)
+        if args.save:
+            try:
+                # Save the board to the file
+                save_board(cards, args.save)
 
-                # If the move is None, change the turn
-                if move is None:
-                    turn = 1
+            except:
+                print("Error saving board.")
 
-        # Check if the move is valid
-        if move in moves:
-            # Make the move
-            selected_house = make_move(cards, move, player1 if turn == 1 else player2, player2 if turn == 1 else player1)
+        # Set up the graphics
+        board = pygraphics.init_board()
 
-            # Set the banners for the players
-            player1_status, player2_status = set_banners(
-                player1, player2, selected_house, turn
-            )
+        # Clear the screen
+        # clear_screen()
 
-            # Print the status of the cards
-            print_cards_status(player1_status, player2_status)
-            # print(len(cards))
+        # Draw the board
+        pygraphics.draw_board(board, cards, "0")
 
-            # Change the turn
-            turn = 2 if turn == 1 else 1
+        # Show the initial board for 2 seconds
+        pygraphics.show_board(2)
 
-            # Draw the board
+        # Check if the players are human or AI
+        if args.player1 == "human":
+            player1_agent = None
+
+        else:
+            # Check if the AI file exists
+            try:
+                player1_agent = importlib.import_module(args.player1)
+
+            except ImportError:
+                print("AI file not found.")
+                return
+
+            if not hasattr(player1_agent, "get_move"):
+                print("AI file does not have the get_move function.")
+                return
+
+        if args.player2 == "human":
+            player2_agent = None
+
+        else:
+            # Check if the AI file exists
+            try:
+                player2_agent = importlib.import_module(args.player2)
+
+            except ImportError:
+                print("AI file not found.")
+                return
+
+            if not hasattr(player2_agent, "get_move"):
+                print("AI file does not have the get_move function.")
+                return
+
+        # Set up the players
+        player1 = Player(args.player1)
+        player2 = Player(args.player2)
+
+        # Set up the turn
+        turn = 1  # 1: player 1's turn, 2: player 2's turn
+
+        # Draw the board
+        pygraphics.draw_board(board, cards, "1")
+
+        while True:
+            # Check the possible moves for the player
+            moves = get_possible_moves(cards)
+
+            # Check if the game is over
+            if len(moves) == 0:
+
+                # Get the winner of the game
+                winner = calculate_winner(player1, player2)
+                if winner == 1:
+                    p1win += 1
+                else:
+                    p2win += 1
+
+                # Display the winner
+                pygraphics.display_winner(
+                    board,
+                    winner,
+                    player1.get_agent() if winner == 1 else player2.get_agent(),
+                )
+
+                # Show the board for 5 seconds
+                pygraphics.show_board(5)
+
+                break
+
+            # Get the player's move
             if turn == 1:
-                pygraphics.draw_board(board, cards, "1")
+                # Check if the player is human or AI
+                if player1_agent is None:
+                    # Wait for the player to make a move with the mouse
+                    move = pygraphics.get_player_move()
+
+                else:
+                    # Get the move from the AI agent
+                    move = try_get_move(player1_agent, cards, player1, player2)
+
+                    # If the move is None, change the turn
+                    if move is None:
+                        turn = 2
 
             else:
-                pygraphics.draw_board(board, cards, "2")
+                # Check if the player is human or AI
+                if player2_agent is None:
+                    # Wait for the player to make a move with the mouse
+                    move = pygraphics.get_player_move()
 
-            # Show the board for 0.5 seconds
-            pygraphics.show_board(0.5)
+                else:
+                    # Get the move from the AI agent
+                    move = try_get_move(player2_agent, cards, player1, player2)
+
+                    # If the move is None, change the turn
+                    if move is None:
+                        turn = 1
+
+            # Check if the move is valid
+            if move in moves:
+                # Make the move
+                selected_house = make_move(cards, move, player1 if turn == 1 else player2, player2 if turn == 1 else player1)
+
+                # Set the banners for the players
+                player1_status, player2_status = set_banners(
+                    player1, player2, selected_house, turn
+                )
+
+                # Print the status of the cards
+                print_cards_status(player1_status, player2_status)
+                print("Player 1 wins: ", p1win)
+                print("Player 2 wins: ", p2win)
+                # print(len(cards))
+
+                # Change the turn
+                turn = 2 if turn == 1 else 1
+
+                # Draw the board
+                if turn == 1:
+                    pygraphics.draw_board(board, cards, "1")
+
+                else:
+                    pygraphics.draw_board(board, cards, "2")
+
+                # Show the board for 0.5 seconds
+                pygraphics.show_board(0.5)
+    print("Player 1 wins: ", p1win)
+    print("Player 2 wins: ", p2win)
 
 
 if __name__ == "__main__":
