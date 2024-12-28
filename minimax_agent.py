@@ -69,7 +69,16 @@ def get_move(cards, player1, player2):
     """
     # print(player1, player2)
     num_cards = len(cards)
-    max_depth = 4
+    if num_cards >= 35:
+        max_depth = 3;
+    elif num_cards >= 25:
+        max_depth = 4
+    elif num_cards < 25:
+        max_depth = 5
+    elif num_cards < 20:
+        max_depth = 20
+    elif num_cards < 16:
+        max_depth = 100
     val, best_move = get_best_move(
         cards, player1, player2, player=player1, depth=0, max_depth=max_depth)
     return best_move
@@ -114,17 +123,21 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
+            temp_player1 = copy.deepcopy(player1)
+            temp_player2 = copy.deepcopy(player2)
             make_move(cards=temp_cards, move=move,
-                      player=player, other_player=player2)
+                      player=temp_player1, other_player=temp_player2)
             h_move, _ = get_best_move(
                 cards=temp_cards,
-                player1=player1,
-                player2=player2,
-                player=player2,
+                player1=temp_player1,
+                player2=temp_player2,
+                player=temp_player2,
                 depth=depth + 1,
                 max_depth=max_depth,
             )
             del temp_cards
+            del temp_player1
+            del temp_player2
             if ans < h_move:
                 ans, best_move = h_move, move
         return ans, best_move
@@ -143,26 +156,24 @@ def get_best_move(cards, player1, player2, player, depth, max_depth):
             ), None
         for move in valid_moves:
             temp_cards = copy.deepcopy(cards)
+            temp_player1 = copy.deepcopy(player1)
+            temp_player2 = copy.deepcopy(player2)
             make_move(cards=temp_cards, move=move,
-                      player=player, other_player=player1)
+                      player=temp_player2, other_player=temp_player1)
             h_move, _ = get_best_move(
                 cards=temp_cards,
-                player1=player1,
-                player2=player2,
-                player=player1,
+                player1=temp_player1,
+                player2=temp_player2,
+                player=temp_player1,
                 depth=depth + 1,
                 max_depth=max_depth,
             )
             del temp_cards
+            del temp_player1
+            del temp_player2
             if ans > h_move:
                 ans, best_move = h_move, move
-        print(ans)
         return ans, best_move
-
-
-def f(num):
-    return num
-    # return (num * (num + 1)) / 2
 
 
 def get_huristics(cards, player: Player, player1: Player, player2: Player, ended):
@@ -186,13 +197,6 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     Baratheon2 = len(player2.cards["Baratheon"])
     Tyrell2 = len(player2.cards["Tyrell"])
     Tully2 = len(player2.cards["Tully"])
-
-    print(len(cards))
-
-    print(Stark1, Greyjoy1, Lannister1, Targaryen1,
-          Baratheon1, Tyrell1, Tully1, '\n')
-    print(Stark2, Greyjoy2, Lannister2, Targaryen2,
-          Baratheon2, Tyrell2, Tully2, '\n')
 
     stark_sum = Stark1 + Stark2
     greyjoy_sum = Greyjoy1 + Greyjoy2
@@ -247,6 +251,9 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
             return 80
         else:
             return -80
+
+    def f(num):
+        return (num * (num + 1)) / 2
 
     # tully hue
     if tully_sum == 2:

@@ -1,3 +1,4 @@
+from utils.classes import Card, Player
 import argparse
 import importlib
 import concurrent.futures
@@ -11,17 +12,18 @@ import copy
 
 # Add the utils folder to the path
 sys.path.append(join(dirname(abspath(__file__)), "utils"))
+import pygraphics
 
 # Import the utils
-import pygraphics
-from utils.classes import Card, Player
 
+# Set the path of the file
 # Set the path of the file
 path = dirname(abspath(__file__))
 
 TIMEOUT = 10  # Time limit for the AI agent
 
-parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
+parser = argparse.ArgumentParser(
+    description="A Game of Thrones: Hand of the King")
 parser.add_argument(
     "--player1",
     metavar="p1",
@@ -116,7 +118,8 @@ def load_board(filename="board"):
     with open(join(path, "boards", filename + ".json"), "r") as file:
         cards = json.load(file)
 
-    cards = [Card(card["house"], card["name"], card["location"]) for card in cards]
+    cards = [Card(card["house"], card["name"], card["location"])
+             for card in cards]
 
     return cards
 
@@ -696,7 +699,8 @@ def main(args):
             # Check if the move is valid
             if move in moves:
                 # Make the move
-                selected_house = make_move(cards, move, player1 if turn == 1 else player2, player2 if turn == 1 else player1)
+                selected_house = make_move(
+                    cards, move, player1 if turn == 1 else player2, player2 if turn == 1 else player1)
 
                 # Set the banners for the players
                 player1_status, player2_status = set_banners(
