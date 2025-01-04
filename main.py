@@ -799,7 +799,7 @@ def main(args):
                         companion_selecting_condition = (move[0] == 'Jaqen' and i + 1 == choices)
 
                         # Set the footer's text
-                        footer_text = 'CC' if companion_selecting_condition else 'BC'
+                        footer_text = 'CC' if companion_selecting_condition else f'BC{i + 1}'
 
                         # Draw the board
                         if turn == 1:

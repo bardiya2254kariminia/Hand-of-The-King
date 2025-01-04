@@ -65,7 +65,8 @@ def load_assets():
     assets['1'] = font.render('Player 1\'s turn', True, [0, 0, 0])
     assets['2'] = font.render('Player 2\'s turn', True, [0, 0, 0])
     assets['CC'] = font.render('Choose a companion', True, [0, 0, 0])
-    assets['BC'] = font.render('Choose a card', True, [0, 0, 0])
+    assets['BC1'] = font.render('Choose the first card', True, [0, 0, 0])
+    assets['BC2'] = font.render('Choose the second card', True, [0, 0, 0])
 
     # Load the background of win screen
     assets['win_screen'] = pygame.image.load(join(assets_path, 'backgrounds', 'win_screen.jpg'))
