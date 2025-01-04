@@ -1,11 +1,14 @@
 import pygame
 import json
 import time
+from moviepy.editor import ImageSequenceClip
+from numpy import rot90, flipud
 from os import pardir, environ
 from os.path import abspath, join, dirname
 
-# Get the path of the assets folder
+# Get the path of the assets and videos folder
 assets_path = join((abspath(join(dirname(abspath(__file__)), pardir))), "assets")
+videos_path = join((abspath(join(dirname(abspath(__file__)), pardir))), "videos")
 
 ROWS = 6 # Number of rows in the board
 COLS = 6 # Number of columns in the board
@@ -17,6 +20,7 @@ BOARD_WIDTH = (COLS + 3) * CARD_SIZE + (COLS + 3 - 1) * MARGIN # Width of the bo
 WIN_WIDTH = COLS * CARD_SIZE + (COLS - 1) * MARGIN  # Width of the win screen
 WINNER_HEIGHT_OFFSET = 36  # Height offset of the winner text
 assets = {} # Dictionary to store every asset
+frames = [] # List to store the frames of the video
 
 def load_assets():
     '''
@@ -156,6 +160,42 @@ def update():
 
     pygame.display.update()
 
+def store_frame(board, needs_resize = False, FPS = 30):
+    '''
+    This function stores the frame of the board.
+
+    Parameters:
+        board (pygame.Surface): the screen for the game
+        needs_resize (bool): whether the frame needs to be resized
+        FPS (int): frames per second
+    '''
+
+    frame = pygame.surfarray.array3d(board) # Get the frame
+
+    if needs_resize: # For the win screen
+        frame = pygame.transform.smoothscale(pygame.surfarray.make_surface(frame), (BOARD_WIDTH, BOARD_HEIGHT)) # Resize the frame
+        frame = pygame.surfarray.array3d(frame) # Get the frame
+
+    frame = rot90(frame) # Rotate the frame
+    frame = flipud(frame) # Flip the frame
+
+    for _ in range(FPS):
+        frames.append(frame) # Store the frame
+
+def save_video(file_name):
+    '''
+    This function saves the video of the game.
+
+    Parameters:
+        file_name (str): name of the video file
+    '''
+
+    # Create a video of the game
+    clip = ImageSequenceClip(frames, fps = 30)
+
+    # Save the video
+    clip.write_videofile(join(videos_path, file_name + '.mp4'), codec = 'libx264')
+
 def draw_footer(board, text):
     '''
     This function draws the footer on the board.
@@ -273,6 +313,8 @@ def draw_board(board, cards, companions, banner_footer, is_cards_gray = False):
     # Update the display
     update()
 
+    store_frame(board) # Store the frame
+
 def display_winner(board, winner, winner_agent):
     '''
     This function displays the winner of the game.
@@ -318,6 +360,8 @@ def display_winner(board, winner, winner_agent):
 
     # Update the display
     update()
+
+    store_frame(board, True) # Store the frame
 
 def show_board(seconds):
     '''
@@ -417,3 +461,11 @@ def get_player_move(card_moves, companions = None):
                 exit()
 
     return location
+
+def close_board():
+    '''
+    This function closes the board.
+    '''
+
+    # Close the window
+    pygame.quit()

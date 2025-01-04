@@ -26,6 +26,7 @@ parser.add_argument('--player1', metavar='p1', type=str, help="either human or a
 parser.add_argument('--player2', metavar='p2', type=str, help="either human or an AI file", default='human')
 parser.add_argument('-l', '--load', type=str, help="file containing starting board setup (for repeatability)", default=None)
 parser.add_argument('-s', '--save', type=str, help="file to save board setup to", default=None)
+parser.add_argument('-v', '--video', type=str, help="name of the video file to save", default=None)
 
 def make_board():
     '''
@@ -875,6 +876,33 @@ def main(args):
             
             # Show the board for 0.5 seconds
             pygraphics.show_board(0.5)
+    
+    # Close the board
+    pygraphics.close_board()
+
+    file_name = args.video # Name of the video file
+
+    if file_name is None: # If not provided
+        # Set the name of the video file as Agent1_vs_Agent2
+        if player1.get_agent() != 'human':
+            file_name = player1.get_agent()[max(0, player1.get_agent().find('/'), player1.get_agent().find('\\')):]
+        
+        else:
+            file_name = player1.get_agent()
+        
+        file_name += '_vs_'
+
+        if player2.get_agent() != 'human':
+            file_name += player2.get_agent()[max(0, player2.get_agent().find('/'), player2.get_agent().find('\\')):]
+        
+        else:
+            file_name += player2.get_agent()
+    
+    try:
+        pygraphics.save_video(file_name) # Save the video of the game
+    
+    except:
+        print("Error saving video.")
 
 if __name__ == "__main__":
     main(parser.parse_args())
