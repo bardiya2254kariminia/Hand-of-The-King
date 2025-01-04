@@ -421,6 +421,31 @@ def make_companion_move(cards, companion_cards, move, player):
     
     return house
 
+def remove_unusable_companion_cards(cards, companion_cards):
+    '''
+    This function removes the companion cards that cannot be used.
+
+    Parameters:
+        cards (list): list of Card objects
+        companion_cards (dict): dictionary of companion cards
+    '''
+
+    # Get the possible moves for the player
+    moves = get_possible_moves(cards)
+
+    if 'Ramsay' in companion_cards.keys() and len(cards) < 2: # Ramsay needs at least two cards to swap
+        del companion_cards['Ramsay']
+    
+    if 'Melisandre' in companion_cards.keys() and len(moves) == 0: # If there are no moves left, there is no point in using Melisandre
+        del companion_cards['Melisandre']
+
+    for companion in list(companion_cards.keys()):
+        if companion_cards[companion]['Choice'] > len(cards) - 1: # If the number of choices is more than the number of cards
+            del companion_cards[companion]
+    
+    if 'Jaqen' in companion_cards.keys() and len(companion_cards) == 1: # If Jaqen is the only companion card left
+        del companion_cards['Jaqen']
+
 def set_banners(player1, player2, last_house, last_turn):
     '''
     This function sets the banners for the players.
@@ -729,12 +754,11 @@ def main(args):
     choose_companion = False
 
     while True:
-        # Check the possible moves for the player
+        # Get the possible moves for the player
         moves = get_possible_moves(cards)
 
-        # Check if the game is over
-        if len(moves) == 0:
-            
+        # Check if the player has no moves left to make
+        if (len(moves) == 0 and ((not choose_companion) or (len(companion_cards) == 0))):
             # Get the winner of the game
             winner = calculate_winner(player1, player2)
             
@@ -823,6 +847,9 @@ def main(args):
                 # Make the companion move
                 is_house = make_companion_move(cards, companion_cards, move, player1 if turn == 1 else player2)
 
+                # Remove the companion cards that cannot be used
+                remove_unusable_companion_cards(cards, companion_cards)
+
                 # Set the banners for the players
                 player1_status, player2_status = set_banners(player1, player2, is_house if is_house is not None else selected_house, turn)
 
@@ -834,7 +861,7 @@ def main(args):
                     # Change the turn
                     turn = 2 if turn == 1 else 1
 
-                choose_companion = False
+                choose_companion = False # Reset the flag
 
             # Draw the board
             if turn == 1:
@@ -850,6 +877,9 @@ def main(args):
         if move in moves:
             # Make the move
             selected_house = make_move(cards, move, player1 if turn == 1 else player2)
+
+            # Remove the companion cards that cannot be used
+            remove_unusable_companion_cards(cards, companion_cards)
 
             # Set the banners for the players
             player1_status, player2_status = set_banners(player1, player2, selected_house, turn)
