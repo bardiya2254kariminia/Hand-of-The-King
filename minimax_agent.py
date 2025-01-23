@@ -1,6 +1,6 @@
 import random
 from time import sleep
-from main import make_move
+from main import make_move, make_companion_move
 import copy
 from utils.classes import *
 
@@ -69,106 +69,121 @@ def get_move(cards, player1, player2 , companion_cards ,choose_companion):
     """
     print(f"{choose_companion=}")
     num_cards = len(cards)
-    max_depth = 4
+    max_depth = 2
     val, best_move = get_best_move(
-        cards, player1, player2, player=player1, depth=0, max_depth=max_depth)
+        cards, player1, player2, player1,companion_cards, choose_companion, depth=0,  max_depth=max_depth)
     return best_move
 
 
-def get_best_move(cards, player1, player2, player, depth, max_depth):
+def get_best_move(cards, player1, player2, player, companion_cards, choose_companion,depth, max_depth):
     """
     getting the best move for 4 depth from now
-    approximate d:
-    d[4] : 14.6 s
-    d[5] : 161 s
-    player1 : maximizer
-    player2 : minimizer
+    you have to change this the same way you did for the get_best_move for the phase1 but this time you also have the make_move_companion
+    whichyou have to use it when choose_companion is set to True
     """
-    # print(max_depth)
-
-    if depth > max_depth:
-
-        return (
-            get_huristics(
-                cards=cards,
-                player=player,
-                player1=player1,
-                player2=player2,
-                ended=False,
-            ),
-            None,
-        )
-
-    if player == player1:
-        # maximizer player
-        ans = -1e8
-        best_move = None
-        valid_moves = get_valid_moves(cards)
-        if len(valid_moves) == 0:
-            return get_huristics(
-                cards=cards,
-                player=player,
-                player1=player1,
-                player2=player2,
-                ended=True,
-            ), None
-        for move in valid_moves:
-            temp_cards = copy.deepcopy(cards)
-            temp_player1 = copy.deepcopy(player1)
-            temp_player2 = copy.deepcopy(player2)
-            make_move(cards=temp_cards, move=move,
-                      player=temp_player1)
-            # make_move(cards=temp_cards, move=move,
-            #           player=temp_player1, other_player=temp_player2)
-            h_move, _ = get_best_move(
-                cards=temp_cards,
-                player1=temp_player1,
-                player2=temp_player2,
-                player=temp_player2,
-                depth=depth + 1,
-                max_depth=max_depth,
+    print(companion_cards)
+    # sleep(10)
+    def not_choose_companion(cards, player1, player2, player,companion_cards, choose_companion,depth, max_depth):      
+        if depth > max_depth:
+            return (
+                get_huristics(
+                    cards=cards,
+                    player=player,
+                    player1=player1,
+                    player2=player2,
+                    ended=False,
+                ),
+                None,
             )
-            del temp_cards
-            del temp_player1
-            del temp_player2
-            if ans < h_move:
-                ans, best_move = h_move, move
-        return ans, best_move
-    else:
-        # minimizer player
-        ans = 1e8
-        best_move = None
-        valid_moves = get_valid_moves(cards)
-        if len(valid_moves) == 0:
-            return get_huristics(
-                cards=cards,
-                player=player,
-                player1=player1,
-                player2=player2,
-                ended=True,
-            ), None
-        for move in valid_moves:
-            temp_cards = copy.deepcopy(cards)
-            temp_player1 = copy.deepcopy(player1)
-            temp_player2 = copy.deepcopy(player2)
-            make_move(cards=temp_cards, move=move,
-                      player=temp_player2)
-            # make_move(cards=temp_cards, move=move,
-            #           player=temp_player2, other_player=temp_player1)
-            h_move, _ = get_best_move(
-                cards=temp_cards,
-                player1=temp_player1,
-                player2=temp_player2,
-                player=temp_player1,
-                depth=depth + 1,
-                max_depth=max_depth,
-            )
-            del temp_cards
-            del temp_player1
-            del temp_player2
-            if ans > h_move:
-                ans, best_move = h_move, move
-        return ans, best_move
+        if choose_companion:
+            # companion = get_best_companion(cards, player1, player2, player, temp_companion_cards)
+            for companion in companion_cards:
+                temp_companion_cards = copy.deepcopy(companion_cards)
+                temp_cards = copy.deepcopy(cards)
+                temp_player1 = copy.deepcopy(player1)
+                temp_player2 = copy.deepcopy(player2)
+                # must find the move for the companion to get the best possible move
+                make_companion_move(cards , companion_cards , [companion] , player)
+
+        if player == player1:
+            # maximizer player
+            def minimax_player1():
+                ans = -1e8
+                best_move = None
+                valid_moves = get_valid_moves(cards)
+                if len(valid_moves) == 0:
+                    return get_huristics(
+                        cards=cards,
+                        player=player,
+                        player1=player1,
+                        player2=player2,
+                        ended=True,
+                    ), None
+                for move in valid_moves:
+                    temp_cards = copy.deepcopy(cards)
+                    temp_player1 = copy.deepcopy(player1)
+                    temp_player2 = copy.deepcopy(player2)
+                    make_move(cards=temp_cards, move=move,
+                            player=temp_player1)
+                    h_move, _ = get_best_move(
+                        cards=temp_cards,
+                        player1=temp_player1,
+                        player2=temp_player2,
+                        player=temp_player2,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                    )
+                    del temp_cards
+                    del temp_player1
+                    del temp_player2
+                    if ans < h_move:
+                        ans, best_move = h_move, move
+                return ans, best_move
+            
+            
+            return minimax_player1()
+        else:
+            # minimizer player
+            def minimax_player2():
+                ans = 1e8
+                best_move = None
+                valid_moves = get_valid_moves(cards)
+                if len(valid_moves) == 0:
+                    return get_huristics(
+                        cards=cards,
+                        player=player,
+                        player1=player1,
+                        player2=player2,
+                        ended=True,
+                    ), None
+                for move in valid_moves:
+                    temp_cards = copy.deepcopy(cards)
+                    temp_player1 = copy.deepcopy(player1)
+                    temp_player2 = copy.deepcopy(player2)
+                    make_move(cards=temp_cards, move=move,
+                            player=temp_player2)
+                    h_move, _ = get_best_move(
+                        cards=temp_cards,
+                        player1=temp_player1,
+                        player2=temp_player2,
+                        player=temp_player1,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                    )
+                    del temp_cards
+                    del temp_player1
+                    del temp_player2
+                    if ans > h_move:
+                        ans, best_move = h_move, move
+                return ans, best_move
+            return minimax_player2()
+    def choose_comp(cards, player1, player2, player, choose_companion,depth, max_depth):
+        # TODO
+        pass
+    
+    # if choose_companion:
+    #     return choose_comp(cards, player1, player2, player, choose_companion,depth, max_depth)
+
 
 
 def get_huristics(cards, player: Player, player1: Player, player2: Player, ended):
@@ -177,7 +192,7 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     """
     # {'Stark': [8], 'Greyjoy': [7], 'Lannister': [6], 'Targaryen': [5], 'Baratheon': [4], 'Tyrell': [3], 'Tully': [2]}
     # for player 1
-    return 1
+    
     Stark1 = len(player1.cards["Stark"])
     Greyjoy1 = len(player1.cards["Greyjoy"])
     Lannister1 = len(player1.cards["Lannister"])
@@ -193,7 +208,14 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player, ended
     Baratheon2 = len(player2.cards["Baratheon"])
     Tyrell2 = len(player2.cards["Tyrell"])
     Tully2 = len(player2.cards["Tully"])
-
+    return (Stark1 - Stark2 +
+            Greyjoy1 - Greyjoy2 + 
+            Lannister1 - Lannister2 + 
+            Targaryen1 - Targaryen2 + 
+            Baratheon1 - Baratheon2 + 
+            Tyrell1 - Tyrell2 + 
+            Tully1 - Tully2
+    )
     stark_sum = Stark1 + Stark2
     greyjoy_sum = Greyjoy1 + Greyjoy2
     lannister_sum = Lannister1 + Lannister2
