@@ -13,7 +13,7 @@ import copy
 sys.path.append(join(dirname(abspath(__file__)), "utils"))
 
 # Import the utils
-import pygraphics
+import utils.pygraphics as pygraphics
 from utils.classes import Card, Player
 
 # Set the path of the file
