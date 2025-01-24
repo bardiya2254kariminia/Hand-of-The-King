@@ -68,7 +68,7 @@ class Player:
         Parameters:
             agent (str): the agent of the player
         '''
-        self.last = {'Stark': 0, 'Greyjoy': 0, 'Lannister': 0, 'Targaryen': 0, 'Baratheon': 0, 'Tyrell': 0, 'Tully': 0}
+
         self.agent = agent
         self.cards = {'Stark': [], 'Greyjoy': [], 'Lannister': [], 'Targaryen': [], 'Baratheon': [], 'Tyrell': [], 'Tully': []}
         self.banners = {'Stark': 0, 'Greyjoy': 0, 'Lannister': 0, 'Targaryen': 0, 'Baratheon': 0, 'Tyrell': 0, 'Tully': 0}
@@ -110,10 +110,9 @@ class Player:
         Parameters:
             card (Card): the card to add to the player
         '''
-        self.cards[card.get_house()].append(card)
-    def flip_last(self, card, num):
-        self.last[card.get_house()] = num
 
+        self.cards[card.get_house()].append(card)
+    
     def get_house_banner(self, house):
         '''
         This function gives the banner of a house to the player.
