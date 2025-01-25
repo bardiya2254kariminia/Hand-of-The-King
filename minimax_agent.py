@@ -131,6 +131,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                         move.append([random.choice(list(companion_cards.keys()))] if companion_cards else [])
             
             return move
+            
 
         else:
             # If no companion cards are left, just return an empty list to signify no action
@@ -169,7 +170,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                 temp_player1 = copy.deepcopy(player1)
                 temp_player2 = copy.deepcopy(player2)
                 make_move(cards=temp_cards, move=move,
-                        player=temp_player1, other_player=temp_player2)
+                        player=temp_player1)
                 h_move, _ = get_best_move(
                     cards=temp_cards,
                     player1=temp_player1,
@@ -202,7 +203,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                 temp_player1 = copy.deepcopy(player1)
                 temp_player2 = copy.deepcopy(player2)
                 make_move(cards=temp_cards, move=move,
-                        player=temp_player2, other_player=temp_player1)
+                        player=temp_player2)
                 h_move, _ = get_best_move(
                     cards=temp_cards,
                     player1=temp_player1,
