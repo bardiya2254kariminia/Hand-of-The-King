@@ -413,6 +413,7 @@ def make_companion_move(cards, companion_cards, move, player):
         second_card = find_card(cards, second_card)
 
         # Remove the selected cards from the cards
+        # print(f"{first_card=}")
         cards.remove(first_card)
         cards.remove(second_card)
 
