@@ -19,7 +19,7 @@ from classes import Card, Player
 # Set the path of the file
 path = dirname(abspath(__file__))
 
-TIMEOUT = 10  # Time limit for the AI agent
+TIMEOUT = 100  # Time limit for the AI agent
 
 parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
 parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
