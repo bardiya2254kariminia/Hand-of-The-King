@@ -13,8 +13,8 @@ import copy
 sys.path.append(join(dirname(abspath(__file__)), "utils"))
 
 # Import the utils
-import utils.pygraphics as pygraphics
-from utils.classes import Card, Player
+import pygraphics
+from classes import Card, Player
 
 # Set the path of the file
 path = dirname(abspath(__file__))
@@ -413,7 +413,6 @@ def make_companion_move(cards, companion_cards, move, player):
         second_card = find_card(cards, second_card)
 
         # Remove the selected cards from the cards
-        # print(f"{first_card=}")
         cards.remove(first_card)
         cards.remove(second_card)
 
@@ -851,6 +850,9 @@ def main(args):
 
                         if not companion_selecting_condition:
                             selectable_cards.remove(selected) # Remove the selected card from the list
+                        
+                        else:
+                            selected = selected[0] # Get the selected card
 
                         move.append(selected) # Add the selected card to the list
 
