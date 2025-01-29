@@ -72,6 +72,7 @@ class Player:
         self.agent = agent
         self.cards = {'Stark': [], 'Greyjoy': [], 'Lannister': [], 'Targaryen': [], 'Baratheon': [], 'Tyrell': [], 'Tully': []}
         self.banners = {'Stark': 0, 'Greyjoy': 0, 'Lannister': 0, 'Targaryen': 0, 'Baratheon': 0, 'Tyrell': 0, 'Tully': 0}
+        self.last = {'Stark': 0, 'Greyjoy': 0, 'Lannister': 0, 'Targaryen': 0, 'Baratheon': 0, 'Tyrell': 0, 'Tully': 0}
 
     def get_agent(self):
         '''
@@ -112,6 +113,8 @@ class Player:
         '''
 
         self.cards[card.get_house()].append(card)
+    def flip_last(self, card, num):
+        self.last[card.get_house()] = num
     
     def get_house_banner(self, house):
         '''

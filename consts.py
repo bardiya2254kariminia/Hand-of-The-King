@@ -1,0 +1,5 @@
+r_consts = []
+s_consts = []
+p1_consts = []
+p2_consts = []
+companion_consts = []

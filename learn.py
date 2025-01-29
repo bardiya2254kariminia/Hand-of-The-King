@@ -18,3 +18,7 @@
 #         #         temp_player2, temp_companion_cards, temp_move , ans , best_move)
 # # a = [1,2,3]
 # # print(str(a))
+import torch
+a = [1,2,3,4]
+a = torch.tensor(a)
+print(a)

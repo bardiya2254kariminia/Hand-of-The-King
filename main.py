@@ -8,6 +8,9 @@ from os.path import abspath, join, dirname
 import sys
 import json
 import copy
+from time import sleep
+import consts
+import torch
 
 # Add the utils folder to the path
 sys.path.append(join(dirname(abspath(__file__)), "utils"))
@@ -15,11 +18,12 @@ sys.path.append(join(dirname(abspath(__file__)), "utils"))
 # Import the utils
 import pygraphics
 from classes import Card, Player
+from utils.training_utils import representation
 
 # Set the path of the file
 path = dirname(abspath(__file__))
 
-TIMEOUT = 100  # Time limit for the AI agent
+TIMEOUT = 10  # Time limit for the AI agent
 
 parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
 parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
@@ -259,18 +263,15 @@ def house_card_count(cards, house):
     
     return count
 
-def make_move(cards, move, player):
-    '''
+def make_move(cards, move, player, other_player):
+    """
     This function makes a move for the player.
 
     Parameters:
         cards (list): list of Card objects
         move (int): location of the card
         player (Player): player making the move
-    
-    Returns:
-        house (str): house of the selected card
-    '''
+    """
 
     # Get the location of Varys
     varys_location = find_varys(cards)
@@ -283,54 +284,80 @@ def make_move(cards, move, player):
 
     # Find the selected card
     selected_card = find_card(cards, move)
-    
+
     removing_cards = []
 
     # Find the cards that should be removed
     for i in range(len(cards)):
-        if cards[i].get_name() == 'Varys':
+        if cards[i].get_name() == "Varys":
             varys_index = i
             continue
-        
         # If the card is between Varys and the selected card and has the same house as the selected card
         if varys_row == move_row and varys_col < move_col:
-            if cards[i].get_location() // 6 == varys_row and varys_col < cards[i].get_location() % 6 < move_col and cards[i].get_house() == selected_card.get_house():
+            if (
+                cards[i].get_location() // 6 == varys_row
+                and varys_col < cards[i].get_location() % 6 < move_col
+                and cards[i].get_house() == selected_card.get_house()
+            ):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
-        
+
         elif varys_row == move_row and varys_col > move_col:
-            if cards[i].get_location() // 6 == varys_row and move_col < cards[i].get_location() % 6 < varys_col and cards[i].get_house() == selected_card.get_house():
+            if (
+                cards[i].get_location() // 6 == varys_row
+                and move_col < cards[i].get_location() % 6 < varys_col
+                and cards[i].get_house() == selected_card.get_house()
+            ):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
-        
+
         elif varys_col == move_col and varys_row < move_row:
-            if cards[i].get_location() % 6 == varys_col and varys_row < cards[i].get_location() // 6 < move_row and cards[i].get_house() == selected_card.get_house():
+            if (
+                cards[i].get_location() % 6 == varys_col
+                and varys_row < cards[i].get_location() // 6 < move_row
+                and cards[i].get_house() == selected_card.get_house()
+            ):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
-        
+
         elif varys_col == move_col and varys_row > move_row:
-            if cards[i].get_location() % 6 == varys_col and move_row < cards[i].get_location() // 6 < varys_row and cards[i].get_house() == selected_card.get_house():
+            if (
+                cards[i].get_location() % 6 == varys_col
+                and move_row < cards[i].get_location() // 6 < varys_row
+                and cards[i].get_house() == selected_card.get_house()
+            ):
                 removing_cards.append(cards[i])
 
                 # Add the card to the player's cards
+                player.flip_last(cards[i], 1)
+                other_player.flip_last(cards[i], 0)
                 player.add_card(cards[i])
-    
+
     # Add the selected card to the player's cards
     player.add_card(selected_card)
+    player.flip_last(selected_card, 1)
+    other_player.flip_last(selected_card, 0)
 
     # Set the location of Varys
     cards[varys_index].set_location(move)
-        
+
     # Remove the cards
+    # print(removing_cards)
     for card in removing_cards:
         cards.remove(card)
-    
+
     # Remove the selected card
     cards.remove(selected_card)
 
@@ -343,7 +370,8 @@ def make_companion_move(cards, companion_cards, move, player):
 
     Parameters:
         cards (list): list of Card objects
-        companion_cards (dict): dictionary of companion cards
+        compan
+        ion_cards (dict): dictionary of companion cards
         move (int): location of the card
         player (Player): player making the move
     
@@ -353,6 +381,8 @@ def make_companion_move(cards, companion_cards, move, player):
 
     selected_companion = move[0] # Selected companion card
     house = None # House of the selected card
+    # print("move=", move)
+    # input()
 
     if selected_companion == 'Jon':
         selected_card = move[1]
@@ -418,6 +448,7 @@ def make_companion_move(cards, companion_cards, move, player):
 
         # Remove the selected companion card from the companion cards
         del companion_cards[selected_companion_card]
+        del companion_cards["Jaqen"]
     
     return house
 
@@ -638,9 +669,9 @@ def validate_agent_move(cards, companion_cards, given_move):
         
         elif card.get_name() != 'Varys':
             locations.append(card.get_location())
-    
+    loop_size = len(given_move) if given_move[0] != 'Jaqen' else len(given_move) - 1
     # Check if the selected cards are valid
-    for i in range(1, len(given_move)):
+    for i in range(1, loop_size):
         if given_move[i] not in locations:
             return False
         
@@ -757,7 +788,7 @@ def main(args):
     # Set up the players
     player1 = Player(args.player1)
     player2 = Player(args.player2)
-
+    # input_data = representation([cards], [player1], [player2], [companion_cards])
     # Set up the turn
     turn = 1 # 1: player 1's turn, 2: player 2's turn
 
@@ -781,7 +812,6 @@ def main(args):
 
             # Show the board for 5 seconds
             pygraphics.show_board(5)
-
             break
 
         # Get the player's move
@@ -894,7 +924,7 @@ def main(args):
         # Check if the move is valid
         if move in moves:
             # Make the move
-            selected_house = make_move(cards, move, player1 if turn == 1 else player2)
+            selected_house = make_move(cards, move, player=(player1 if turn == 1 else player2), other_player=(player2 if turn == 1 else player1))
 
             # Remove the companion cards that cannot be used
             remove_unusable_companion_cards(cards, companion_cards)
@@ -952,5 +982,32 @@ def main(args):
     except:
         print("Error saving video.")
 
+
 if __name__ == "__main__":
-    main(parser.parse_args())
+    for game in range(1):
+        try:
+            main(parser.parse_args())
+            print(f"{consts.r_consts}")
+            sleep(1)
+            # states = consts.s_consts
+            # rewards = consts.r_consts
+            # p1_data = consts.p1_consts
+            # p2_data = consts.p2_consts
+            # companion_card_data = consts.companion_consts
+            # input_data = representation(states, p1_data, p2_data, companion_card_data)
+        except:
+            print("looping skipping this segment")
+            continue
+    states = consts.s_consts
+    rewards = consts.r_consts
+    p1_data = consts.p1_consts
+    p2_data = consts.p2_consts
+    companion_card_data = consts.companion_consts
+    input_data = representation(states, p1_data, p2_data, companion_card_data)
+    output_data = torch.tensor(rewards)
+    ckpt = {
+        "input_data" : input_data,
+        "output_data" : output_data
+    }
+    torch.save(ckpt, "nashrie_data.pt")
+    
