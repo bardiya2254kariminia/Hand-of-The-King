@@ -199,10 +199,11 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                         else:
                             # If there aren't enough moves or companion cards, just return what's possible
                             move.extend(valid_moves)
-                            if temp_companion_cards:
-                                for companion_choice in list(temp_companion_cards.keys()):
+                            if companion_cards:
+                                for companion_choice in list(companion_cards.keys()):
                                         temp_move = copy.deepcopy(move)
-                                        temp_move.append([companion_choice])
+                                        temp_move.extend([companion_choice])
+                                        print(f"{temp_move=}")
                                         ans , best_move = make_move_for_companion(cards , player, player1,
                                                 player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
                                         del temp_move
