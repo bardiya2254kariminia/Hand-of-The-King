@@ -718,7 +718,7 @@ def main(args):
     Parameters:
         args (Namespace): command line arguments
     '''
-
+    winner_flag = 1
     if args.load:
         try:
             # Load the board from the file
@@ -806,7 +806,7 @@ def main(args):
         if (len(moves) == 0 and ((not choose_companion) or (len(companion_cards) == 0))):
             # Get the winner of the game
             winner = calculate_winner(player1, player2)
-            
+            winner_flag = winner
             # Display the winner
             pygraphics.display_winner(board, winner, player1.get_agent() if winner == 1 else player2.get_agent())
 
@@ -981,10 +981,11 @@ def main(args):
     
     except:
         print("Error saving video.")
+    return winner_flag
 
 
 if __name__ == "__main__":
-    for game in range(1):
+    for game in range(40):
         try:
             main(parser.parse_args())
             print(f"{consts.r_consts}")

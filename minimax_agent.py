@@ -117,8 +117,8 @@ def get_move(cards, player1, player2, companion_cards, choose_companion):
     consts.companion_consts.append(companion_cards)
     consts.p1_consts.append(player1)
     consts.p2_consts.append(player2)
-    print(f"{consts.r_consts=}")
-    sleep(1)
+    # print(f"{consts.r_consts=}")
+    # sleep(1)
     return best_move
 
 

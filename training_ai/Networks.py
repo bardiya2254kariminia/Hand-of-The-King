@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Qnetwork(nn.Module):
-    def __init__(self, in_c , out_c):
+    def __init__(self, in_c=56 , out_c=1):
         super(Qnetwork, self).__init__()
         self.arc = nn.Sequential(
             nn.Linear(in_c , 128),
