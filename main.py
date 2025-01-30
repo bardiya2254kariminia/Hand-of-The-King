@@ -448,7 +448,6 @@ def make_companion_move(cards, companion_cards, move, player):
 
         # Remove the selected companion card from the companion cards
         del companion_cards[selected_companion_card]
-        del companion_cards["Jaqen"]
     
     return house
 
@@ -988,8 +987,8 @@ if __name__ == "__main__":
     for game in range(40):
         try:
             main(parser.parse_args())
-            print(f"{consts.r_consts}")
-            sleep(1)
+            # print(f"{consts.r_consts}")
+            # sleep(1)
             # states = consts.s_consts
             # rewards = consts.r_consts
             # p1_data = consts.p1_consts
@@ -999,16 +998,16 @@ if __name__ == "__main__":
         except:
             print("looping skipping this segment")
             continue
-    states = consts.s_consts
-    rewards = consts.r_consts
-    p1_data = consts.p1_consts
-    p2_data = consts.p2_consts
-    companion_card_data = consts.companion_consts
-    input_data = representation(states, p1_data, p2_data, companion_card_data)
-    output_data = torch.tensor(rewards)
-    ckpt = {
-        "input_data" : input_data,
-        "output_data" : output_data
-    }
-    torch.save(ckpt, "nashrie_data.pt")
+    # states = consts.s_consts
+    # rewards = consts.r_consts
+    # p1_data = consts.p1_consts
+    # p2_data = consts.p2_consts
+    # companion_card_data = consts.companion_consts
+    # input_data = representation(states, p1_data, p2_data, companion_card_data)
+    # output_data = torch.tensor(rewards)
+    # ckpt = {
+    #     "input_data" : input_data,
+    #     "output_data" : output_data
+    # }
+    # torch.save(ckpt, "nashrie_data.pt")
     

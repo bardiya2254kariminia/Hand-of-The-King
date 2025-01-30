@@ -196,7 +196,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                         # continue
                         valid_moves = get_valid_jon_sandor_jaqan(cards)
 
-                        if len(valid_moves) >= 2 and len(companion_cards) -1 > 0:
+                        if len(valid_moves) >= 2 and len(companion_cards) > 0:
                             for v  in list(combinations(valid_moves, 2)):
                                 for companion_choice in list(companion_cards.keys() - ["Jaqen"]):
                                     temp_move = copy.deepcopy(move)
@@ -206,21 +206,26 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                                     del temp_move
                         else:
                             # If there aren't enough moves or companion cards, just return what's possible
-                            move.extend(valid_moves)
-                            if companion_cards:
-                                for companion_choice in list(companion_cards.keys()):
-                                        temp_move = copy.deepcopy(move)
-                                        temp_move.extend([companion_choice])
-                                        # print(f"{temp_move=}")
-                                        ans , best_move = make_move_for_companion(cards , player, player1,
-                                                player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
-                                        del temp_move
-                            else:
-                                temp_move = copy.deepcopy(move)
-                                temp_move.append([])
-                                ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2,companion_cards,depth, temp_move , ans , best_move, max_depth_companion) 
-                                del temp_move                   
+                            temp_move = copy.deepcopy(move)
+                            temp_move.extend(valid_moves)
+                            temp_move.append(random.choice(list(companion_cards.keys())) if companion_cards else None)
+                            ans , best_move = make_move_for_companion(cards , player, player1,
+                                    player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                            del temp_move
+                            # if companion_cards:
+                            #     for companion_choice in list(companion_cards.keys()- ["Jaqen"]):
+                            #             temp_move = copy.deepcopy(move)
+                            #             temp_move.extend([companion_choice])
+                            #             # print(f"{temp_move=}")
+                            #             ans , best_move = make_move_for_companion(cards , player, player1,
+                            #                     player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                            #             del temp_move
+                            # else:
+                            #     temp_move = copy.deepcopy(move)
+                            #     temp_move.append(None)
+                            #     ans , best_move = make_move_for_companion(cards , player, player1,
+                            #                 player2,companion_cards,depth, temp_move , ans , best_move, max_depth_companion) 
+                            #     del temp_move                   
                 
 
                 return ans , best_move
