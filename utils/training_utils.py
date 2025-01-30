@@ -3,6 +3,7 @@ import torch.nn
 from utils.classes import Card, Player
 from training_ai.Networks import Qnetwork
 import random
+import os
 # from main import main
 import argparse
 
@@ -22,7 +23,6 @@ def find_varys(cards):
     varys_location = varys[0].get_location()
 
     return varys_location
-
 
 def get_valid_moves(cards):
     """
@@ -54,7 +54,6 @@ def get_valid_moves(cards):
             moves.append(card.get_location())
 
     return moves
-
 
 def representation(full_cards: Card , player1s:Player , player2s:Player, companion_cards:Card):
     map_house = {'Stark': 1, 'Greyjoy': 2, 'Lannister': 3, 'Targaryen': 4, 'Baratheon': 5, 'Tyrell': 6, 'Tully': 7}
@@ -110,7 +109,7 @@ def crossover(model1:torch.nn.Module , model2:torch.nn.Module, p_crossover = 0.1
     else:
         return model1,  model2
     
-def fittness(model, games = 5):
+def fittness(model, games = 2):
     parser = argparse.ArgumentParser(description="A Game of Thrones: Hand of the King")
     parser.add_argument('--player1', metavar='p1', type=str, help="either human or an AI file", default='human')
     parser.add_argument('--player2', metavar='p2', type=str, help="either human or an AI file", default='human')
@@ -135,4 +134,17 @@ def selection(population_models , primal_model =torch.nn.Module,next_gen_num = 5
         model= model_fitness[i][0]
         selected_models.append(model)
     return selected_models
+
+def save_weights(model:torch.nn.Module, out_path = "."):
+    out = os.path.join(out_path , "final_model.pt")
+    torch.save(model.state_dict(), out)
+
+def load_weigths(model:torch.nn.Module, input_path= "heuristic_model.pt"):
+    """
+    loading the model 
+    output : loaded model 
+    """
+    ckpt  =  torch.load(input_path, map_location="cpu")
+    model.load_state_dict(ckpt ,  strict=False)
+    return  model
 

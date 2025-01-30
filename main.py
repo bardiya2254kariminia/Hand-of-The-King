@@ -985,7 +985,7 @@ def main(args):
 
 if __name__ == "__main__":
     for game in range(40):
-        try:
+        # try:
             main(parser.parse_args())
             # print(f"{consts.r_consts}")
             # sleep(1)
@@ -995,9 +995,9 @@ if __name__ == "__main__":
             # p2_data = consts.p2_consts
             # companion_card_data = consts.companion_consts
             # input_data = representation(states, p1_data, p2_data, companion_card_data)
-        except:
-            print("looping skipping this segment")
-            continue
+        # except:
+        #     print("looping skipping this segment")
+        #     continue
     # states = consts.s_consts
     # rewards = consts.r_consts
     # p1_data = consts.p1_consts
