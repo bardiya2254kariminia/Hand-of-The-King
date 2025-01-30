@@ -2,41 +2,47 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 from torch.nn import MSELoss
+from torch.utils.data import DataLoader, Dataset , random_split , TensorDataset
 from Networks import Qnetwork
+from tqdm import tqdm
 
-ckpt = torch.load(f="" , map_location="cpu")
-states_common = ckpt["states_common"]
-actions_common = ckpt["actions_common"]
-rewards_common = ckpt["rewards_common"]
-states = ckpt["states_common"]
-actions = ckpt["actions_common"]
-rewards = ckpt["rewards_common"]
+dataset_path  = "nashrie_data.pt"
+ckpt = torch.load(f=dataset_path , map_location="cpu")
+input_data = torch.stack(ckpt["input_data"]).to("cuda")
+output_data = ckpt["output_data"].to("cuda")
+print(f"{input_data.shape=} , {output_data.shape=}")
 
+if __name__ == "__main__":
+    net = Qnetwork().to("cuda")
+    mse_loss = MSELoss()
+    optimizer = Adam(
+        params=net.parameters(),
+        lr=0.01,
+    )
+    DATASET = TensorDataset(input_data , output_data)
+    BATCH_SIZE = 2
+    EPOCHES = 100
+    NUM_WORKERS = 2
 
-common_net = Qnetwork(in_c=51 , out_c=51)
-companion_net = Qnetwork(in_c=57 , out_c=6)
-mse_loss = MSELoss()
-optimizer_common = Adam(
-    params=common_net.parameters(),
-    lr=0.01,
-)
-optimizer_companion = Adam(
-    params=companion_net.parameters(),
-    lr=0.01,
-)
-epoches = 100
+    dataloader = DataLoader(
+        dataset=DATASET,
+        batch_size=BATCH_SIZE,
+        num_workers=NUM_WORKERS,
+        shuffle=True,
+        drop_last=True
+    )
 
-for epoch in epoches:
-    optimizer.zero_grad()
-    
-    # Get Q-values for all actions
-    q_values = q_network(states)
-    
-    # Extract the Q-values for the chosen actions
-    q_values_for_actions = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
-    
-    # Compute the loss (difference between predicted Q-values and Minimax rewards)
-    loss = criterion(q_values_for_actions, rewards)
-    
-    loss.backward()
-    optimizer.step()
+    for epoch in range(EPOCHES):
+        net.train()
+        print(f"{epoch= }")
+        for idx, (input , target) in tqdm(enumerate(dataloader , 1), total=len(dataloader)):
+        # for idx, (input , target) in enumerate(dataloader , 1):
+            optimizer.zero_grad()
+            predicted = net(input).squeeze(dim=1)
+            loss = mse_loss(predicted , target)
+            loss.backward()
+            optimizer.step()
+
+    # Loading the state_dict
+    state_dict = net.state_dict()
+    torch.save(state_dict ,"heuristic_model.pt")
