@@ -10,16 +10,17 @@ import consts
 from training_ai.Networks import Qnetwork
 from utils.training_utils import representation
 
-# heuristic_agent = Qnetwork()
-# model_path = "heuristic_model.pt"
-# ckpt = torch.load(model_path, map_location="cpu")
-# heuristic_agent.load_state_dict(state_dict=ckpt)
-# heuristic_agent.eval()
+heuristic_agent = Qnetwork()
+model_path = "heuristic_model.pt"
+ckpt = torch.load(model_path, map_location="cpu")
+heuristic_agent.load_state_dict(state_dict=ckpt)
+heuristic_agent.eval()
 
 
 def set_agent(m1):
     global heuristic_agent
     heuristic_agent = m1
+    heuristic_agent.eval()
 
 
 def find_varys(cards):
