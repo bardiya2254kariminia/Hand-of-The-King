@@ -1,7 +1,7 @@
 import random
 import torch
 from time import sleep
-from main import make_move , make_companion_move , house_card_count , remove_unusable_companion_cards ,set_banners
+from main import make_move, make_companion_move, house_card_count, remove_unusable_companion_cards, set_banners
 import copy
 from utils.classes import *
 from itertools import combinations
@@ -10,11 +10,17 @@ import consts
 from training_ai.Networks import Qnetwork
 from utils.training_utils import representation
 
-heuristic_agent  = Qnetwork()
-model_path = "heuristic_model.pt"
-ckpt = torch.load(model_path, map_location="cpu")
-heuristic_agent.load_state_dict(state_dict=ckpt)
-heuristic_agent.eval()
+# heuristic_agent = Qnetwork()
+# model_path = "heuristic_model.pt"
+# ckpt = torch.load(model_path, map_location="cpu")
+# heuristic_agent.load_state_dict(state_dict=ckpt)
+# heuristic_agent.eval()
+
+
+def set_agent(m1):
+    global heuristic_agent
+    heuristic_agent = m1
+
 
 def find_varys(cards):
     """
@@ -72,16 +78,16 @@ def get_valid_ramsay(cards):
 
     Parameters:
         cards (list): list of Card objects
-    
+
     Returns:
         moves (list): list of possible moves
     '''
 
-    moves=[]
+    moves = []
 
     for card in cards:
         moves.append(card.get_location())
-    
+
     return moves
 
 
@@ -91,17 +97,17 @@ def get_valid_jon_sandor_jaqan(cards):
 
     Parameters:
         cards (list): list of Card objects
-    
+
     Returns:
         moves (list): list of possible moves
     '''
 
-    moves=[]
+    moves = []
 
     for card in cards:
         if card.get_name() != 'Varys':
             moves.append(card.get_location())
-    
+
     return moves
 
 
@@ -131,7 +137,7 @@ def get_move(cards, player1, player2, companion_cards, choose_companion):
     return best_move
 
 
-def get_best_move(cards, player1, player2, player, companion_cards, choose_companion, depth, max_depth, max_depth_companion = 0):
+def get_best_move(cards, player1, player2, player, companion_cards, choose_companion, depth, max_depth, max_depth_companion=0):
     """
     getting the best move for 4 depth from now
     approximate d:
@@ -141,7 +147,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
     player2 : minimizer
     """
     try:
-        # Normal move, choose from valid moves     
+        # Normal move, choose from valid moves
         if depth > max_depth:
 
             return (
@@ -155,23 +161,25 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                 ),
                 None,
             )
-    
-        if choose_companion:   
+
+        if choose_companion:
             # Choose a random companion card if available
             if player == player1:
                 ans = -1e8
             else:
                 ans = 1e8
             best_move = None
-            
+
             if companion_cards:
                 for selected_companion in list(companion_cards.keys()):
-                    move = [selected_companion] # Add the companion card to the move list
-                    choices = companion_cards[selected_companion]['Choice'] # Get the number of choices required by the companion card     
+                    # Add the companion card to the move list
+                    move = [selected_companion]
+                    # Get the number of choices required by the companion card
+                    choices = companion_cards[selected_companion]['Choice']
                     # For each choice required by the companion card
                     if choices == 0:
-                        ans , best_move = make_move_for_companion(cards , player, player1,
-                                                player2, companion_cards,depth, move , ans , best_move, max_depth_companion)
+                        ans, best_move = make_move_for_companion(cards, player, player1,
+                                                                 player2, companion_cards, depth, move, ans, best_move, max_depth_companion)
 
                     if choices == 1:  # For cards like Jon Snow
                         for valid_move in get_valid_jon_sandor_jaqan(cards):
@@ -179,40 +187,43 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                             temp_move.append(valid_move)
                             # print(f"{temp_move=}")
                             # sleep(0.5)
-                            ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                            ans, best_move = make_move_for_companion(cards, player, player1,
+                                                                     player2, companion_cards, depth, temp_move, ans, best_move, max_depth_companion)
                             del temp_move
-                    
+
                     elif choices == 2:  # For cards like Ramsay
 
                         valid_moves = get_valid_ramsay(cards)
 
                         if len(valid_moves) >= 2:
-                            for valid_move  in list(combinations(valid_moves, 2)):
+                            for valid_move in list(combinations(valid_moves, 2)):
                                 temp_move = copy.deepcopy(move)
-                                temp_move.extend([valid_move[0] , valid_move[1]])
-                                ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                                temp_move.extend(
+                                    [valid_move[0], valid_move[1]])
+                                ans, best_move = make_move_for_companion(cards, player, player1,
+                                                                         player2, companion_cards, depth, temp_move, ans, best_move, max_depth_companion)
                                 del temp_move
-                        
+
                         else:
                             temp_move = copy.deepcopy(move)
-                            temp_move.extend(valid_moves)  # If not enough moves, just use what's available
-                            ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                            # If not enough moves, just use what's available
+                            temp_move.extend(valid_moves)
+                            ans, best_move = make_move_for_companion(cards, player, player1,
+                                                                     player2, companion_cards, depth, temp_move, ans, best_move, max_depth_companion)
                             del temp_move
-                        
+
                     elif choices == 3:  # Special case for Jaqen with an additional companion card selection
                         # continue
                         valid_moves = get_valid_jon_sandor_jaqan(cards)
 
                         if len(valid_moves) >= 2 and len(companion_cards) > 0:
-                            for v  in list(combinations(valid_moves, 2)):
+                            for v in list(combinations(valid_moves, 2)):
                                 for companion_choice in list(companion_cards.keys() - ["Jaqen"]):
                                     temp_move = copy.deepcopy(move)
-                                    temp_move.extend([v[0] ,v[1] ,companion_choice])
-                                    ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2, companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                                    temp_move.extend(
+                                        [v[0], v[1], companion_choice])
+                                    ans, best_move = make_move_for_companion(cards, player, player1,
+                                                                             player2, companion_cards, depth, temp_move, ans, best_move, max_depth_companion)
                                     del temp_move
                         # else:
                         #     # If there aren't enough moves or companion cards, just return what's possible
@@ -229,17 +240,16 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                         #         temp_move.append(None)
                         #         print(f"{temp_move=}")
                         #         ans , best_move = make_move_for_companion(cards , player, player1,
-                        #                     player2,companion_cards,depth, temp_move , ans , best_move, max_depth_companion) 
-                        #         del temp_move                   
-                
+                        #                     player2,companion_cards,depth, temp_move , ans , best_move, max_depth_companion)
+                        #         del temp_move
 
-                return ans , best_move
+                return ans, best_move
             else:
                 # If no companion cards are left, just return an empty list to signify no action
-                ans , best_move = make_move_for_companion(cards , player, player1,
-                                            player2, companion_cards, [] , ans , best_move, max_depth_companion) 
-            return ans , best_move
-        
+                ans, best_move = make_move_for_companion(cards, player, player1,
+                                                         player2, companion_cards, [], ans, best_move, max_depth_companion)
+            return ans, best_move
+
         else:
             if player == player1:
                 # maximizer player
@@ -261,7 +271,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                     temp_player2 = copy.deepcopy(player2)
                     temp_companion_cards = copy.deepcopy(companion_cards)
                     selected_house = make_move(cards=temp_cards, move=move,
-                            player=temp_player1, other_player=temp_player2)
+                                               player=temp_player1, other_player=temp_player2)
                     # determining if we have to choose companions or not:
                     next_depth = depth+1
                     next_choose_companion = False
@@ -278,7 +288,7 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                         companion_cards=temp_companion_cards,
                         choose_companion=next_choose_companion,
                         depth=next_depth,
-                        max_depth=max_depth, 
+                        max_depth=max_depth,
                         max_depth_companion=max_depth_companion
                     )
                     del temp_cards
@@ -308,13 +318,13 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
                     temp_player2 = copy.deepcopy(player2)
                     temp_companion_cards = copy.deepcopy(companion_cards)
                     selected_house = make_move(cards=temp_cards, move=move,
-                            player=temp_player2, other_player=temp_player1)
+                                               player=temp_player2, other_player=temp_player1)
                     next_depth = depth+1
                     next_choose_companion = False
                     next_player = temp_player1
                     if house_card_count(temp_cards, selected_house) == 0 and len(temp_companion_cards) != 0:
-                        next_choose_companion = True 
-                        next_depth = depth 
+                        next_choose_companion = True
+                        next_depth = depth
                         next_player = temp_player2
                     h_move, _ = get_best_move(
                         cards=temp_cards,
@@ -338,63 +348,64 @@ def get_best_move(cards, player1, player2, player, companion_cards, choose_compa
         sys.exit()
 
 
-def make_move_for_companion(cards , 
-                        player , 
-                        player1 , 
-                        player2, 
-                        companion_cards ,
-                        depth,
-                        move, 
-                        ans,
-                        best_move, 
-                        max_depth_companion):
+def make_move_for_companion(cards,
+                            player,
+                            player1,
+                            player2,
+                            companion_cards,
+                            depth,
+                            move,
+                            ans,
+                            best_move,
+                            max_depth_companion):
     temp_cards = copy.deepcopy(cards)
     temp_player = copy.deepcopy(player)
     temp_player1 = copy.deepcopy(player1)
     temp_player2 = copy.deepcopy(player2)
     temp_companion_cards = copy.deepcopy(companion_cards)
     temp_move = copy.deepcopy(move)
-    is_house= make_companion_move(temp_cards , 
-                        temp_companion_cards , 
-                        temp_move , 
-                        temp_player)
+    is_house = make_companion_move(temp_cards,
+                                   temp_companion_cards,
+                                   temp_move,
+                                   temp_player)
     if is_house:
-        set_banners(temp_player, temp_player1 if temp_player == temp_player2 else temp_player1, is_house,1 if temp_player == temp_player1 else 2)
+        set_banners(temp_player, temp_player1 if temp_player ==
+                    temp_player2 else temp_player1, is_house, 1 if temp_player == temp_player1 else 2)
     if temp_move[0] == "Melisandre":
         next_player = temp_player
         next_depth = depth
     else:
         next_player = temp_player1 if temp_player == temp_player2 else temp_player2
         next_depth = depth + 1
-    h_move , _ = get_best_move(
-                temp_cards,
-                temp_player1,
-                temp_player2,
-                next_player,
-                temp_companion_cards,
-                choose_companion=False,
-                depth=next_depth,
-                max_depth=max_depth_companion,
-                max_depth_companion=max_depth_companion)
+    h_move, _ = get_best_move(
+        temp_cards,
+        temp_player1,
+        temp_player2,
+        next_player,
+        temp_companion_cards,
+        choose_companion=False,
+        depth=next_depth,
+        max_depth=max_depth_companion,
+        max_depth_companion=max_depth_companion)
     del temp_cards
     del temp_player
     del temp_player1
     del temp_player2
     del temp_companion_cards
     if player == player1 and ans < h_move:
-        ans , best_move = h_move , temp_move
+        ans, best_move = h_move, temp_move
     elif player == player2 and ans > h_move:
-        ans , best_move = h_move,  temp_move
+        ans, best_move = h_move,  temp_move
     del temp_move
-    return ans , best_move
+    return ans, best_move
 
 
-def get_huristics(cards, player: Player, player1: Player, player2: Player,companion_cards, ended , is_ai = True):
+def get_huristics(cards, player: Player, player1: Player, player2: Player, companion_cards, ended, is_ai=True):
     """
     finding the huristics for the given situation and the player
     """
     if is_ai:
-        rep = representation([cards] , [player1] , [player2] , [companion_cards])
+        rep = representation([cards], [player1], [player2], [companion_cards])
         input = torch.stack(rep)
         out = heuristic_agent(input)
         return float(out.detach().cpu())
@@ -415,10 +426,10 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player,compan
     Baratheon2 = len(player2.cards["Baratheon"])
     Tyrell2 = len(player2.cards["Tyrell"])
     Tully2 = len(player2.cards["Tully"])
-    # return (Stark1 - Stark2 + 
+    # return (Stark1 - Stark2 +
     #         Greyjoy1 - Greyjoy2 +
-    #         Lannister1 - Lannister2 + 
-    #         Targaryen1 - Targaryen2 + 
+    #         Lannister1 - Lannister2 +
+    #         Targaryen1 - Targaryen2 +
     #         Baratheon1   - Baratheon2 +
     #         Tyrell1 - Tyrell2 +
     #         Tully1 - Tully2)
@@ -546,5 +557,5 @@ def get_huristics(cards, player: Player, player1: Player, player2: Player,compan
         p2score += max(0, diif_mull * (f(Stark2) / 4) - f(Stark1) / 4)
     # if p1score > p2score:
     #     print(p1score - p2score)
-        
+
     return p1score - p2score
